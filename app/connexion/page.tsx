@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, spaceLabel } from "@/lib/accounts";
-import { Liquid } from "@/components/liquid";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -12,17 +12,22 @@ export default function LoginPage() {
 
   return (
     <div className="auth-grid">
-      <Liquid />
-      <aside className="auth-aside stage">
-        <p className="kicker">Auto HR</p>
-        <h1 className="display mt-4">Chaque métier a son interface.</h1>
-        <p className="quiet mt-5 max-w-md text-lg">
-          Réception, atelier, comptabilité, achats, direction et client entrent dans leur espace. Le superadmin ouvre l’interface de n’importe quel membre.
-        </p>
-      </aside>
-      <main className="stage grid place-items-center px-4 py-10">
+      <section className="auth-brand">
+        <Image src="/logo.jpg" alt="Logo du Garage Auto HR" width={128} height={128} priority />
+        <div>
+          <p className="kicker !text-[#e7b2ad]">Kipé, Conakry</p>
+          <h1 className="mt-2">Garage Auto HR</h1>
+        </div>
+        <p className="max-w-sm text-lg text-[#ddd4ca]">Chaque métier entre dans son espace. Le client ne voit que le statut publié par la comptabilité.</p>
+        <ol className="auth-steps">
+          <li><b>1</b><span>La réception ouvre le dossier de la voiture.</span></li>
+          <li><b>2</b><span>L’atelier diagnostique. La comptabilité prépare la facture et publie le statut.</span></li>
+          <li><b>3</b><span>La direction valide les achats. La réparation attend 70 % du règlement.</span></li>
+        </ol>
+      </section>
+      <main className="auth-panel">
         <form
-          className="glass rise w-full max-w-md p-7"
+          className="auth-card"
           onSubmit={async (event) => {
             event.preventDefault();
             setPending(true);
@@ -41,9 +46,9 @@ export default function LoginPage() {
             window.location.href = body?.role === "superadmin" ? "/admin" : "/";
           }}
         >
-          <p className="kicker">Connexion</p>
-          <h2 className="mt-2 text-2xl">Entrer dans l’espace</h2>
-          <label className="mt-6 grid gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">Connexion</h2>
+          <p className="quiet mt-1">Choisissez un compte, ou saisissez l’e-mail.</p>
+          <label className="mt-5 grid gap-1">
             <span className="label">E-mail</span>
             <input className="field" type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required />
           </label>
@@ -51,28 +56,25 @@ export default function LoginPage() {
             <span className="label">Mot de passe</span>
             <input className="field" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
           </label>
-          {error ? <p className="mt-3 text-sm text-[#8d3a32]">{error}</p> : null}
+          {error ? <p className="mt-3 text-sm text-[#8e322c]">{error}</p> : null}
           <button className="btn mt-5 w-full" type="submit" disabled={pending}>
-            {pending ? "Ouverture…" : "Continuer"}
+            {pending ? "Ouverture…" : "Entrer"}
           </button>
-          <div className="mt-6">
-            <p className="hint">Comptes livrés · mot de passe {DEMO_PASSWORD}</p>
-            <div className="mt-2 grid gap-1">
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  key={account.id}
-                  className="btn-ghost justify-between"
-                  type="button"
-                  onClick={() => {
-                    setEmail(account.email);
-                    setPassword(DEMO_PASSWORD);
-                  }}
-                >
-                  <span>{account.name}</span>
-                  <small className="quiet">{spaceLabel(account.role)}</small>
-                </button>
-              ))}
-            </div>
+          <p className="hint mt-6">Comptes livrés · mot de passe {DEMO_PASSWORD}</p>
+          <div className="account-grid mt-2">
+            {DEMO_ACCOUNTS.map((account) => (
+              <button
+                key={account.id}
+                type="button"
+                onClick={() => {
+                  setEmail(account.email);
+                  setPassword(DEMO_PASSWORD);
+                }}
+              >
+                <span className="font-semibold">{account.name}</span>
+                <small>{spaceLabel(account.role)}</small>
+              </button>
+            ))}
           </div>
         </form>
       </main>

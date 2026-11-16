@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useGarage } from "@/components/garage-provider";
 import { Empty } from "@/components/kit";
@@ -29,13 +30,32 @@ export function Desk() {
               ? "Diagnostiquez, puis réparez seulement après l’acompte de 70 %."
               : "Les pannes arrivent de l’atelier. Préparez la facture et les achats."
         }
-        action={role === "reception" ? <Link className="btn" href="/nouveau">Nouvel ordre de réception</Link> : role === "comptabilite" ? <Link className="btn-line" href="/grille">Grille et stock</Link> : null}
+        action={role === "reception" ? <Link className="btn" href="/nouveau">Nouvel ordre</Link> : role === "comptabilite" ? <Link className="btn" href="/grille">Grille et stock</Link> : null}
+        stats={
+          role === "reception"
+            ? [
+                { label: "En cours", value: state.dossiers.filter((item) => item.status !== "reparation_faite").length },
+                { label: "Terminées", value: state.dossiers.filter((item) => item.status === "reparation_faite").length },
+                { label: "Dossiers", value: state.dossiers.length },
+              ]
+            : role === "atelier"
+              ? [
+                  { label: "À diagnostiquer", value: state.dossiers.filter((item) => item.status === "recu").length },
+                  { label: "Réparation autorisée", value: state.dossiers.filter((item) => item.status === "paiement_effectue").length },
+                  { label: "En diagnostic", value: state.dossiers.filter((item) => item.status === "diagnostic" || item.status === "facture_prete").length },
+                ]
+              : [
+                  { label: "Factures à préparer", value: state.dossiers.filter((item) => item.status === "diagnostic").length },
+                  { label: "Acomptes à encaisser", value: state.dossiers.filter((item) => item.status === "facture_prete").length },
+                  { label: "Statuts non publiés", value: state.dossiers.filter((item) => item.clientStatus !== item.status).length },
+                ]
+        }
       />
       {groups.map((group) => (
         <section key={group.title} className="grid gap-3">
           <h2 className="kicker">{group.title}</h2>
           {group.items.length ? (
-            <div className="stagger grid gap-3">
+            <div className="card-grid">
               {group.items.map((dossier) => (
                 <CarCard key={dossier.id} dossier={dossier} />
               ))}
@@ -70,16 +90,29 @@ function groupsFor(role: "reception" | "atelier" | "comptabilite", dossiers: Dos
   ];
 }
 
-function Header({ kicker, title, text, action }: { kicker: string; title: string; text: string; action?: ReactNode }) {
+function Header({ kicker, title, text, action, stats }: { kicker: string; title: string; text: string; action?: ReactNode; stats?: { label: string; value: number }[] }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p className="kicker">{kicker} · Conakry</p>
-        <h1 className="display mt-2">{title}</h1>
-        <p className="quiet mt-3 max-w-xl">{text}</p>
-      </div>
-      {action}
-    </header>
+    <div className="grid gap-4">
+      <header className="home-hero">
+        <Image src="/logo.jpg" alt="Garage Auto HR" width={88} height={88} className="home-logo" />
+        <div>
+          <p className="kicker">{kicker}</p>
+          <h1 className="mt-1">{title}</h1>
+          <p className="quiet mt-2 max-w-xl">{text}</p>
+        </div>
+        {action ? <div className="home-action">{action}</div> : null}
+      </header>
+      {stats?.length ? (
+        <div className="stat-grid">
+          {stats.map((stat) => (
+            <article key={stat.label} className="stat">
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </article>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -88,22 +121,18 @@ function CarCard({ dossier }: { dossier: Dossier }) {
   if (!state) return null;
   const title = titleOf(state, dossier);
   return (
-    <Link href={`/dossier/${dossier.id}`} className="glass block p-5 transition duration-500 hover:-translate-y-0.5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="plate">{title.plate}</p>
-          <p className="mt-1">{title.model}</p>
-          <p className="quiet text-sm">{title.client}</p>
-        </div>
-        <span className="rounded-full bg-white/70 px-3 py-1 text-sm">
-          {role === "client" ? (dossier.clientStatus ? STATUS_LABEL[dossier.clientStatus] : "Statut non publié") : STATUS_LABEL[dossier.status]}
-        </span>
-      </div>
-      {role === "client" ? (
-        <p className="mt-4 text-sm">{dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut."}</p>
-      ) : (
-        <p className="mt-4 text-sm">{nextAction(dossier)}</p>
-      )}
+    <Link href={`/dossier/${dossier.id}`} className="car">
+      <span className={role === "client" && !dossier.clientStatus ? "badge wait" : "badge"}>
+        {role === "client" ? (dossier.clientStatus ? STATUS_LABEL[dossier.clientStatus] : "Statut non publié") : STATUS_LABEL[dossier.status]}
+      </span>
+      <p className="plate">{title.plate}</p>
+      <p>{title.model}</p>
+      <p className="text-sm">{title.client}</p>
+      <p className="mt-auto text-sm text-[#16181c]">
+        {role === "client"
+          ? (dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut.")
+          : nextAction(dossier)}
+      </p>
     </Link>
   );
 }
@@ -118,9 +147,14 @@ function ClientDesk() {
       <Header
         kicker="Client"
         title={client?.company || client?.name || "Mes voitures"}
-        text="Suivez l’étape en cours et la facture. La réparation commence après 70 %."
+        text="Vous voyez seulement le statut publié par la comptabilité."
+        stats={[
+          { label: "Voitures", value: dossiers.length },
+          { label: "Statut publié", value: dossiers.filter((item) => item.clientStatus).length },
+          { label: "En attente", value: dossiers.filter((item) => !item.clientStatus).length },
+        ]}
       />
-      <div className="stagger grid gap-3">
+      <div className="card-grid">
         {dossiers.map((dossier) => (
           <CarCard key={dossier.id} dossier={dossier} />
         ))}
@@ -140,12 +174,17 @@ function DirectionDesk() {
         kicker="Direction"
         title="Tous les dossiers"
         text="Ouvrez une voiture pour voir le client, la réception, les pannes, les solutions et les achats."
+        stats={[
+          { label: "Dossiers", value: state.dossiers.length },
+          { label: "Achats à valider", value: pending.length },
+          { label: "Réparations faites", value: state.dossiers.filter((item) => item.status === "reparation_faite").length },
+        ]}
       />
       <section className="grid gap-3">
         <h2 className="kicker">Achats à valider</h2>
         {pending.length ? pending.map((purchase) => <PurchaseDecision key={purchase.id} purchase={purchase} actor={actorName} run={run} />) : <p className="quiet">Aucun achat en attente de validation.</p>}
       </section>
-      <section className="stagger grid gap-3">
+      <section className="card-grid">
         {sortDossiers(state.dossiers).map((dossier) => (
           <CarCard key={dossier.id} dossier={dossier} />
         ))}
@@ -199,6 +238,11 @@ function Purchases() {
         kicker="Achats"
         title="Liste à acheter"
         text="Seulement les pièces validées : quantité, prix maximum et échéance. Indiquez le prix obtenu."
+        stats={[
+          { label: "À acheter", value: open.length },
+          { label: "Déjà acheté", value: done.length },
+          { label: "En attente de validation", value: state.purchases.filter((item) => item.status === "a_valider").length },
+        ]}
         action={
           <div className="flex gap-2">
             {compta ? <a className="btn-wa" href={`https://wa.me/${compta.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Bonjour, au sujet des achats du garage.")}`}>Compta</a> : null}

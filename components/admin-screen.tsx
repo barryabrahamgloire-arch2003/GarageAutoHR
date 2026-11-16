@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Liquid } from "@/components/liquid";
 import { DEMO_PASSWORD, spaceLabel, type SpaceRole } from "@/lib/accounts";
 import { ROLES } from "@/lib/types";
 
@@ -107,9 +107,8 @@ export function AdminScreen() {
 
   if (!directory) {
     return (
-      <div className="grid min-h-dvh place-items-center">
-        <Liquid />
-        <p className="stage quiet">{error || "Ouverture de la plateforme…"}</p>
+      <div className="grid min-h-dvh place-items-center bg-[#f3efe8]">
+        <p className="quiet">{error || "Ouverture de la plateforme…"}</p>
       </div>
     );
   }
@@ -117,21 +116,24 @@ export function AdminScreen() {
   const selectedGarage = directory.garages.find((garage) => garage.id === memberForm.garageId);
 
   return (
-    <div className="min-h-dvh">
-      <Liquid />
-      <div className="stage mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 md:px-8">
-        <header className="glass flex flex-wrap items-end justify-between gap-4 p-6">
-          <div>
-            <p className="kicker">Plateforme</p>
-            <h1 className="display mt-2 text-[2.6rem]">Superadmin</h1>
-            <p className="quiet mt-2">Les garages, leurs membres, et l’interface de chacun.</p>
-          </div>
-          <button className="btn-line" type="button" onClick={() => fetch("/api/logout", { method: "POST" }).then(() => router.push("/connexion"))}>
-            Sortir
-          </button>
+    <div className="admin-frame">
+      <header className="admin-bar">
+        <Image src="/logo.jpg" alt="" width={48} height={48} />
+        <div>
+          <strong className="block leading-none">Garage Auto HR</strong>
+          <small className="text-[#b7aea4]">Superadmin</small>
+        </div>
+        <button className="btn-line" type="button" onClick={() => fetch("/api/logout", { method: "POST" }).then(() => router.push("/connexion"))}>
+          Sortir
+        </button>
+      </header>
+      <div className="admin-body">
+        <header>
+          <h1 className="text-3xl font-bold tracking-tight">Plateforme</h1>
+          <p className="quiet mt-1">Les garages, leurs membres, et l’interface de chacun.</p>
         </header>
 
-        <section className="grid gap-3 sm:grid-cols-3">
+        <section className="metric-grid">
           <Metric label="Garages" value={String(directory.garages.length)} />
           <Metric label="Membres" value={String(directory.accounts.length)} />
           <Metric label="Dossiers" value={String(directory.garages.reduce((sum, garage) => sum + garage.dossiers, 0))} />
