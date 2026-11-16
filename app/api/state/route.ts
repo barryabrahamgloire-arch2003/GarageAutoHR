@@ -3,7 +3,7 @@ import { getState } from "@/lib/store";
 
 export async function GET() {
   await connection();
-  return Response.json(getState(), {
+  return Response.json(await getState(), {
     headers: { "Cache-Control": "no-store" },
   });
 }

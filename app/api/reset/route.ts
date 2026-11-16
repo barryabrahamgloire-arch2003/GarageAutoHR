@@ -3,7 +3,7 @@ import { resetState } from "@/lib/store";
 
 export async function POST() {
   await connection();
-  return Response.json(resetState(), {
+  return Response.json(await resetState(), {
     headers: { "Cache-Control": "no-store" },
   });
 }

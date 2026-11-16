@@ -6,10 +6,10 @@ import { useGarage } from "@/components/garage-provider";
 import { ReceptionEditor, ReportEditor, WorkshopEditor } from "@/components/forms";
 import { Empty, PaperRow, SignatureView, StatusRail, WhatsApp } from "@/components/kit";
 import { emptyWorkshop, liveInvoice, moneyOf, reportDraft } from "@/lib/domain";
-import { formatDay, formatWhen, gnf, parseAmount, STATUS_HELP } from "@/lib/format";
+import { formatDay, formatWhen, gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { byPost, clientOf } from "@/lib/selectors";
 import { talkTo } from "@/lib/talk";
-import type { Dossier, PartNeed } from "@/lib/types";
+import { STATUSES, type Dossier, type PartNeed } from "@/lib/types";
 
 export function DossierScreen({ id }: { id: string }) {
   const garage = useGarage();
@@ -44,12 +44,23 @@ export function DossierScreen({ id }: { id: string }) {
             <p className="mt-2 text-lg">{dossier.reception.makeModel}</p>
             <p className="quiet">{dossier.reception.engine}{client.driver ? ` · Chauffeur ${client.driver}` : ""}</p>
           </div>
-          <p className="max-w-sm text-sm">{STATUS_HELP[dossier.status]}</p>
+          {role === "client" ? (
+            <p className="max-w-sm text-sm">
+              {dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut de cette voiture."}
+            </p>
+          ) : (
+            <p className="max-w-sm text-sm">{STATUS_HELP[dossier.status]}</p>
+          )}
         </div>
         <div className="mt-5">
-          <StatusRail status={dossier.status} />
+          {role === "client" ? (
+            dossier.clientStatus ? <StatusRail status={dossier.clientStatus} /> : null
+          ) : (
+            <StatusRail status={dossier.status} />
+          )}
         </div>
       </header>
+      {role === "client" ? null : (<>
 
       {talks.length ? (
         <section className="no-print">
@@ -64,10 +75,8 @@ export function DossierScreen({ id }: { id: string }) {
 
       {bill ? <DepositBanner dossier={dossier} covered={bill.covered} due={bill.depositDue} paid={bill.paid} balance={bill.balance} canRecord={canMoney} /> : null}
 
-      {role === "client" ? (
-        <ClientView dossier={dossier} faults={dossier.reception.arrivalFaults} result={dossier.reception.diagnosticResult} />
-      ) : (
-        <>
+          <PublishStatus dossier={dossier} />
+          <DirectionComments dossier={dossier} />
           <Sheet title="Ordre de réception" action={canEditReception ? "reception" : undefined} dossier={dossier}>
             <PaperRow label="Date d’ouverture" value={formatDay(dossier.reception.openedAt)} />
             <PaperRow label="Immatriculation" value={dossier.reception.plate} />
@@ -103,8 +112,7 @@ export function DossierScreen({ id }: { id: string }) {
           <ReportBlock dossier={dossier} canEdit={canReport} />
           {(role === "direction" || role === "reception") ? <Meeting dossier={dossier} /> : null}
           <Journal dossier={dossier} />
-        </>
-      )}
+        </>)}
     </div>
   );
 }
@@ -547,7 +555,7 @@ function Meeting({ dossier }: { dossier: Dossier }) {
         </div>
       </div>
       <div className="mt-3 grid gap-2">
-        {dossier.notes.map((note) => (
+        {dossier.notes.filter((note) => note.kind === "voir_client").map((note) => (
           <p key={note.id} className="text-sm"><strong>{note.author}</strong> · {formatWhen(note.at)} — {note.text}</p>
         ))}
       </div>
@@ -569,37 +577,59 @@ function Journal({ dossier }: { dossier: Dossier }) {
   );
 }
 
-function ClientView({ dossier, faults, result }: { dossier: Dossier; faults: string; result: string }) {
-  const { state } = useGarage();
-  if (!state || !dossier.invoice) {
-    return (
-      <section className="glass p-6">
-        <p>{STATUS_HELP[dossier.status]}</p>
-        <PaperRow label="Pannes signalées" value={faults} />
-        {result ? <PaperRow label="Constat de l’atelier" value={result} /> : null}
-      </section>
-    );
-  }
-  const bill = moneyOf(dossier.invoice, dossier.depositPaid);
+function PublishStatus({ dossier }: { dossier: Dossier }) {
+  const { role, run, actorName } = useGarage();
+  if (role !== "comptabilite") return null;
   return (
-    <section className="glass p-6" id="facture">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg">Facture {dossier.invoice.number}</h2>
-        <button className="btn-line no-print" type="button" onClick={() => window.print()}>Imprimer</button>
+    <section className="glass p-6">
+      <h2 className="text-lg">Statut visible par le client</h2>
+      <p className="quiet mt-1 text-sm">Seul ce bouton met à jour ce que le client voit. Tant qu’il n’est pas publié, le client ne voit pas de statut.</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {STATUSES.map((status) => (
+          <button
+            key={status}
+            className={dossier.clientStatus === status ? "btn" : "btn-line"}
+            type="button"
+            onClick={() => run({ type: "setClientStatus", payload: { dossierId: dossier.id, status, actor: actorName } }, "Statut publié au client")}
+          >
+            {STATUS_LABEL[status]}
+          </button>
+        ))}
       </div>
-      <PaperRow label="Pannes signalées" value={faults} />
-      {dossier.invoice.lines.map((line) => (
-        <div className="row" key={line.id}>
-          <span>{line.qty} × {line.label}</span>
-          <strong>{gnf(line.qty * line.unitPrice)}</strong>
-        </div>
-      ))}
-      <div className="row"><span>Main-d’œuvre</span><strong>{gnf(dossier.invoice.labor)}</strong></div>
-      <div className="row"><span>Total</span><strong>{gnf(bill.ttc)}</strong></div>
-      <div className="row"><span>Acompte 70 %</span><strong>{gnf(bill.depositDue)}</strong></div>
-      <div className="row"><span>Déjà reçu</span><strong>{gnf(bill.paid)}</strong></div>
-      <div className="row"><span>Reste</span><strong>{gnf(bill.balance)}</strong></div>
-      {!bill.covered ? <p className="mt-4">La réparation commencera après le paiement de {gnf(bill.depositRemaining)}.</p> : null}
+    </section>
+  );
+}
+
+function DirectionComments({ dossier }: { dossier: Dossier }) {
+  const { role, run, actorName } = useGarage();
+  const [text, setText] = useState("");
+  const [pending, setPending] = useState(false);
+  const comments = dossier.notes.filter((note) => note.kind === "commentaire");
+  return (
+    <section className="glass p-6">
+      <h2 className="text-lg">Commentaires de la direction</h2>
+      {role === "direction" ? (
+        <form
+          className="mt-3 grid gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setPending(true);
+            run({ type: "addComment", payload: { dossierId: dossier.id, text, actor: actorName } }, "Commentaire ajouté").then((ok) => {
+              if (ok) setText("");
+            }).finally(() => setPending(false));
+          }}
+        >
+          <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} placeholder="Commentaire sur ce dossier" />
+          <button className="btn" type="submit" disabled={pending || !text.trim()}>Publier le commentaire</button>
+        </form>
+      ) : (
+        <p className="quiet mt-1 text-sm">Lisibles par l’équipe. Seule la direction les écrit.</p>
+      )}
+      <div className="mt-4 grid gap-2">
+        {comments.length ? comments.map((note) => (
+          <p key={note.id} className="text-sm"><strong>{note.author}</strong> · {formatWhen(note.at)} — {note.text}</p>
+        )) : <p className="quiet text-sm">Aucun commentaire.</p>}
+      </div>
     </section>
   );
 }

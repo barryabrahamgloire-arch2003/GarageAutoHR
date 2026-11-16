@@ -261,6 +261,10 @@ export function applyAction(state: State, action: Action): State {
       return finishRepair(state, action.payload.dossierId, action.payload.actor);
     case "requestClientMeeting":
       return requestClientMeeting(state, action.payload.dossierId, action.payload.text, action.payload.actor);
+    case "addComment":
+      return addComment(state, action.payload.dossierId, action.payload.text, action.payload.actor);
+    case "setClientStatus":
+      return setClientStatus(state, action.payload.dossierId, action.payload.status, action.payload.actor);
     case "saveProduct":
       return saveProduct(state, action.payload.product, action.payload.actor);
     default:
@@ -304,6 +308,7 @@ function openReception(state: State, input: ReceptionInput): State {
     id: dossierId,
     number: nextNumber(state),
     status: "recu",
+    clientStatus: null,
     clientId,
     vehicleId,
     reception: order,
@@ -702,6 +707,41 @@ function finishRepair(state: State, dossierId: string, actor: string): State {
     },
     name,
     "Réparation terminée.",
+  );
+  return replaceDossier(state, next);
+}
+
+function addComment(state: State, dossierId: string, text: string, actor: string): State {
+  const name = actorOf(actor);
+  const message = requireText(text, "Écrivez le commentaire.");
+  const dossier = dossierOf(state, dossierId);
+  const next = log(
+    {
+      ...dossier,
+      notes: [{ id: uid("nt"), at: nowIso(), author: name, text: message, kind: "commentaire" }, ...dossier.notes],
+    },
+    name,
+    "Commentaire de la direction.",
+  );
+  return replaceDossier(state, next);
+}
+
+function setClientStatus(state: State, dossierId: string, status: Dossier["status"], actor: string): State {
+  const name = actorOf(actor);
+  const order = ["recu", "diagnostic", "facture_prete", "paiement_effectue", "reparation_faite"];
+  if (!order.includes(status)) throw new DomainError("Statut inconnu.");
+  const dossier = dossierOf(state, dossierId);
+  const labels: Record<Dossier["status"], string> = {
+    recu: "Reçu",
+    diagnostic: "Diagnostic",
+    facture_prete: "Facture prête",
+    paiement_effectue: "Paiement effectué",
+    reparation_faite: "Réparation faite",
+  };
+  const next = log(
+    { ...dossier, clientStatus: status },
+    name,
+    `Statut publié au client : ${labels[status]}.`,
   );
   return replaceDossier(state, next);
 }

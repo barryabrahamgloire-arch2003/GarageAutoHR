@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useGarage } from "@/components/garage-provider";
 import { Empty } from "@/components/kit";
-import { gnf, parseAmount, STATUS_LABEL } from "@/lib/format";
+import { gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { clientDossiers, nextAction, sortDossiers, titleOf } from "@/lib/selectors";
 import { roleLabel } from "@/lib/talk";
 import type { Dossier, Purchase } from "@/lib/types";
@@ -84,7 +84,7 @@ function Header({ kicker, title, text, action }: { kicker: string; title: string
 }
 
 function CarCard({ dossier }: { dossier: Dossier }) {
-  const { state } = useGarage();
+  const { state, role } = useGarage();
   if (!state) return null;
   const title = titleOf(state, dossier);
   return (
@@ -95,9 +95,15 @@ function CarCard({ dossier }: { dossier: Dossier }) {
           <p className="mt-1">{title.model}</p>
           <p className="quiet text-sm">{title.client}</p>
         </div>
-        <span className="rounded-full bg-white/70 px-3 py-1 text-sm">{STATUS_LABEL[dossier.status]}</span>
+        <span className="rounded-full bg-white/70 px-3 py-1 text-sm">
+          {role === "client" ? (dossier.clientStatus ? STATUS_LABEL[dossier.clientStatus] : "Statut non publié") : STATUS_LABEL[dossier.status]}
+        </span>
       </div>
-      <p className="mt-4 text-sm">{nextAction(dossier)}</p>
+      {role === "client" ? (
+        <p className="mt-4 text-sm">{dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut."}</p>
+      ) : (
+        <p className="mt-4 text-sm">{nextAction(dossier)}</p>
+      )}
     </Link>
   );
 }

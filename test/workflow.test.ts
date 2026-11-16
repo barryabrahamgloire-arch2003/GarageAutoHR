@@ -29,6 +29,7 @@ describe("circuit du garage de Conakry", () => {
     });
     const dossier = state.dossiers.find((item) => item.reception.plate === "RC 9090 T")!;
     assert.equal(dossier.status, "recu");
+    assert.equal(dossier.clientStatus, null);
     assert.equal(dossier.reception.plate, "RC 9090 T");
 
     state = go(state, {
@@ -142,6 +143,18 @@ describe("circuit du garage de Conakry", () => {
     state = go(state, { type: "finishRepair", payload: { dossierId: dossier.id, actor: "Fatoumata Bah" } });
     current = state.dossiers.find((item) => item.id === dossier.id)!;
     assert.equal(current.status, "reparation_faite");
+    assert.equal(current.clientStatus, null);
+    state = go(state, {
+      type: "setClientStatus",
+      payload: { dossierId: dossier.id, status: "reparation_faite", actor: "Ibrahima Sow" },
+    });
+    state = go(state, {
+      type: "addComment",
+      payload: { dossierId: dossier.id, text: "Travaux conformes, le client peut récupérer le véhicule.", actor: "Alpha Oumar Barry" },
+    });
+    current = state.dossiers.find((item) => item.id === dossier.id)!;
+    assert.equal(current.clientStatus, "reparation_faite");
+    assert.equal(current.notes[0]?.kind, "commentaire");
   });
 
   it("refuse d’encaisser avant la facture et de modifier une facture payée", () => {

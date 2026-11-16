@@ -144,7 +144,7 @@ export function createSeed(): State {
     chefSignature: "",
   };
 
-  const dossiers: Dossier[] = [
+  const dossiers = [
     {
       id: "d_hilux",
       number: "HR-2616",
@@ -403,7 +403,7 @@ export function createSeed(): State {
   ];
 
   return {
-    version: 2,
+    version: 3,
     settings: {
       name: "Garage Auto HR",
       city: "Conakry",
@@ -452,7 +452,10 @@ export function createSeed(): State {
       { id: "pompe-eau", name: "Pompe à eau", reference: "PE-01", category: "Moteur", price: 850000, stock: 1, unit: "pièce" },
       { id: "radiateur", name: "Radiateur", reference: "RAD-01", category: "Refroidissement", price: 2500000, stock: 0, unit: "pièce" },
     ],
-    dossiers,
+    dossiers: dossiers.map((dossier) => ({
+      ...dossier,
+      clientStatus: dossier.id === "d_hilux" ? null : dossier.status,
+    })) as Dossier[],
     purchases,
   };
 }

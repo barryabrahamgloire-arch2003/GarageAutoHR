@@ -18,3 +18,7 @@ npm test
 ```
 
 Les dossiers d’exemple sont recréés au premier lancement dans `data/garage.json`. Le bouton « Exemples » les restaure.
+
+La comptabilité publie le statut vu par le client. La direction commente les dossiers.
+
+Pour brancher Supabase, créez un access token puis renseignez `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`. La table est dans `supabase/migrations`.

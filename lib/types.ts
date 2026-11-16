@@ -186,7 +186,7 @@ export interface Note {
   at: string;
   author: string;
   text: string;
-  kind: "note" | "voir_client";
+  kind: "note" | "voir_client" | "commentaire";
 }
 
 export interface JournalEvent {
@@ -200,6 +200,7 @@ export interface Dossier {
   id: string;
   number: string;
   status: Status;
+  clientStatus: Status | null;
   clientId: string;
   vehicleId: string;
   reception: ReceptionOrder;
@@ -216,7 +217,7 @@ export interface Dossier {
 }
 
 export interface State {
-  version: 2;
+  version: 3;
   settings: Settings;
   staff: Staff[];
   clients: Client[];
@@ -260,4 +261,6 @@ export type Action =
   | { type: "saveReport"; payload: { dossierId: string; report: ActivityReport; actor: string } }
   | { type: "finishRepair"; payload: { dossierId: string; actor: string } }
   | { type: "requestClientMeeting"; payload: { dossierId: string; text: string; actor: string } }
+  | { type: "addComment"; payload: { dossierId: string; text: string; actor: string } }
+  | { type: "setClientStatus"; payload: { dossierId: string; status: Status; actor: string } }
   | { type: "saveProduct"; payload: { product: Product; actor: string } };
