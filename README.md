@@ -17,7 +17,7 @@ L’application écoute sur http://127.0.0.1:3847.
 npm test
 ```
 
-Les dossiers d’exemple sont recréés au premier lancement dans `data/garage.json`. Le bouton « Exemples » les restaure.
+La connexion ouvre une interface par métier. Le superadmin peut ouvrir l’interface d’un membre. Les comptes livrés sont listés sur la page de connexion.
 
 La comptabilité publie le statut vu par le client. La direction commente les dossiers.
 

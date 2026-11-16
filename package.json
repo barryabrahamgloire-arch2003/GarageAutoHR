@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 3847",
     "lint": "eslint",
-    "test": "tsx --test test/workflow.test.ts"
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

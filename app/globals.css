@@ -303,6 +303,28 @@
 .dock a { text-decoration: none; color: #5d656e; font-size: 0.78rem; padding: 0.45rem 0.5rem; border-radius: 14px; }
 .dock a.on { color: #17191c; background: rgba(255, 255, 255, 0.7); }
 
+.auth-grid {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+}
+.auth-aside { display: grid; align-content: end; padding: 4rem; }
+.impersonate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.75rem 1rem;
+  border-radius: 20px;
+  background: #17191c;
+  color: white;
+}
+@media (max-width: 860px) {
+  .auth-grid { grid-template-columns: 1fr; }
+  .auth-aside { align-content: start; padding: 2rem 1.2rem 0; }
+}
+
 @media (min-width: 768px) {
   .dock { display: none; }
 }

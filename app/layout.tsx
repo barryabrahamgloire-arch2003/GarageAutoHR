@@ -15,8 +15,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Garage Auto HR",
-  description: "Réception, atelier, achats et factures du Garage Auto HR à Conakry.",
+  title: "Auto HR",
+  description: "Espaces séparés pour la réception, l’atelier, la comptabilité, les achats, la direction et le client.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
