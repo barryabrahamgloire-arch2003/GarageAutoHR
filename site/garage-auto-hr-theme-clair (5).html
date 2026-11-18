@@ -756,6 +756,17 @@ body{background:#0D141C;color:#F1E8D5}
 .hr-rest{color:#F1E8D5;font-weight:inherit}
 
 
+
+.crew{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.crew__card{display:flex;flex-direction:column;background:#141F2B;border:1px solid rgba(241,232,213,.16);border-radius:18px;overflow:hidden;min-width:0}
+.crew__card img,.crew__mark{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 18%;background:#1B2735}
+.crew__mark{display:grid;place-items:center;font-family:var(--font-display);font-size:clamp(2.4rem,4vw,3.2rem);letter-spacing:.06em;color:#F1E8D5}
+.crew__body{padding:16px 16px 18px}
+.crew__body h3{font-size:1.12rem;font-weight:700;line-height:1.25;margin-bottom:6px}
+.crew__body p{margin:0;color:rgba(241,232,213,.88);font-size:1.02rem;line-height:1.5}
+.crew__body strong{color:#F1E8D5;font-weight:700}
+@media(max-width:980px){.crew{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.crew{grid-template-columns:1fr}}
 /* Mission, engagements et ambition : même voix */
 .about__text p.statement,
 .team-band__overlay p.statement,
@@ -1333,7 +1344,7 @@ body{background:#0D141C;color:#F1E8D5}
               <h3>Une ambition : <span class="accent">une référence en Guinée</span></h3>
               <p class="statement"><strong>Notre ambition.</strong> Bâtir une entreprise automobile moderne, reconnue en République de Guinée pour son excellence technique, son professionnalisme et sa capacité à répondre aux standards internationaux. Devenir une référence, notamment auprès des entreprises, des institutions et des gestionnaires de flottes automobiles.</p>
             </div>
-            <a class="btn btn--primary" data-route="contact" role="link" tabindex="0">Rencontrer l'équipe</a>
+            <a class="btn btn--primary" data-route="about" data-anchor="#equipe" role="link" tabindex="0">Rencontrer l'équipe</a>
           </div>
         </div>
       </div>
@@ -1341,6 +1352,103 @@ body{background:#0D141C;color:#F1E8D5}
 
 
 
+
+
+    <section class="section" id="equipe">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">L'équipe</span>
+          <h2 class="section-title">Les femmes et les hommes de<br><span class="accent">Garage Auto HR Conakry</span></h2>
+          <p class="section-sub">Douze métiers, une même exigence d'expertise, de qualité, de sûreté et de confort, à Kipé.</p>
+        </div>
+        <div class="crew">
+          <article class="crew__card" data-reveal>
+            <img src="/equipe/gloria.jpg" alt="Lawson Body Gloria, directrice administrative et financière" loading="lazy">
+            <div class="crew__body">
+              <h3>Lawson Body Gloria</h3>
+              <p><strong>Directrice administrative et financière.</strong> Factures, caisse, déclarations et suivi comptable.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.1s">
+            <img src="/equipe/foulematou.jpg" alt="Foulématou Traoré, responsable commercial et relation client" loading="lazy">
+            <div class="crew__body">
+              <h3>Foulématou Traoré</h3>
+              <p><strong>Responsable commercial et relation client.</strong> Accueil, devis et suivi des clients.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.2s">
+            <div class="crew__mark" role="img" aria-label="Franck Touré, responsable magasin et stock">FT</div>
+            <div class="crew__body">
+              <h3>Franck Touré</h3>
+              <p><strong>Responsable magasin et stock.</strong> Commandes, inventaires et pièces détachées.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.3s">
+            <img src="/equipe/kama.jpg" alt="Kama Anthony Loua, électricien automobile" loading="lazy">
+            <div class="crew__body">
+              <h3>Kama Anthony Loua</h3>
+              <p><strong>Électricien automobile.</strong> 38 ans de métier : calculateurs, clés et diagnostic.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal>
+            <img src="/equipe/mbalou.jpg" alt="M'Balou Traoré, mécanicien poids lourds et engins" loading="lazy">
+            <div class="crew__body">
+              <h3>M'Balou Traoré</h3>
+              <p><strong>Mécanicien poids lourds et engins.</strong> Véhicules légers, camions et engins miniers.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.1s">
+            <img src="/equipe/naby.jpg" alt="Naby Youssouf Soumah, mécanicien" loading="lazy">
+            <div class="crew__body">
+              <h3>Naby Youssouf Soumah</h3>
+              <p><strong>Mécanicien.</strong> Transmission, freinage et recherche de pannes.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.2s">
+            <img src="/equipe/amadou.jpg" alt="Amadou Touré, mécanicien" loading="lazy">
+            <div class="crew__body">
+              <h3>Amadou Touré</h3>
+              <p><strong>Mécanicien.</strong> Moteur, transmission et freinage.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.3s">
+            <img src="/equipe/karamo.jpg" alt="Karamo Sacko, électricien automobile" loading="lazy">
+            <div class="crew__body">
+              <h3>Karamo Sacko</h3>
+              <p><strong>Électricien automobile.</strong> Diagnostic au scan et recherche de pannes.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal>
+            <div class="crew__mark" role="img" aria-label="Claude Guilavogui, électricien automobile">CG</div>
+            <div class="crew__body">
+              <h3>Claude Guilavogui</h3>
+              <p><strong>Électricien automobile.</strong> Circuits électriques, pannes et systèmes d'alarme.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.1s">
+            <img src="/equipe/laye.jpg" alt="Laye Mara, électricien automobile" loading="lazy">
+            <div class="crew__body">
+              <h3>Laye Mara</h3>
+              <p><strong>Électricien automobile.</strong> Véhicules légers, camions et entretien courant.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.2s">
+            <div class="crew__mark" role="img" aria-label="Siaka Sacko, chauffeur et convoyeur">SS</div>
+            <div class="crew__body">
+              <h3>Siaka Sacko</h3>
+              <p><strong>Chauffeur et convoyeur.</strong> Déplacement, récupération et livraison des véhicules.</p>
+            </div>
+          </article>
+          <article class="crew__card" data-reveal style="--d:.3s">
+            <div class="crew__mark" role="img" aria-label="Mariama Soumah, agent d'entretien">MS</div>
+            <div class="crew__body">
+              <h3>Mariama Soumah</h3>
+              <p><strong>Agent d'entretien.</strong> Propreté et hygiène des locaux.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
     <section class="section">
       <div class="container">
