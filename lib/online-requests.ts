@@ -1,25 +1,9 @@
 import { randomUUID } from "crypto";
-import fs from "fs";
-import path from "path";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { loadPlatform, updatePlatform } from "./store";
+import type { OnlineRequest } from "./platform";
 
-export type RequestKind = "client" | "fournisseur";
-
-export interface OnlineRequest {
-  id: string;
-  kind: RequestKind;
-  name: string;
-  phone: string;
-  email: string;
-  subject: string;
-  vehicle: string;
-  category: string;
-  message: string;
-  createdAt: string;
-  seenAt: string | null;
-}
-
-const BUCKET = "online-requests";
+export type { OnlineRequest };
+export type RequestKind = OnlineRequest["kind"];
 
 function clip(value: unknown, max: number) {
   return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, max);
@@ -61,104 +45,25 @@ export function parseOnlineRequest(body: unknown): OnlineRequest {
   };
 }
 
-function folder() {
-  const preferred = path.join(process.cwd(), "data", "online-requests");
-  try {
-    fs.mkdirSync(preferred, { recursive: true });
-    fs.accessSync(preferred, fs.constants.W_OK);
-    return preferred;
-  } catch {
-    const fallback = path.join("/tmp", "garage-auto-hr", "online-requests");
-    fs.mkdirSync(fallback, { recursive: true });
-    return fallback;
-  }
-}
-
-function remote(): SupabaseClient | null {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, { auth: { persistSession: false } });
-}
-
-async function ensureBucket(client: SupabaseClient) {
-  const { error } = await client.storage.createBucket(BUCKET, { public: false });
-  if (error && !/exist|duplicate|already/i.test(error.message)) throw error;
-}
-
-function isRequest(value: unknown): value is OnlineRequest {
-  if (!value || typeof value !== "object") return false;
-  const row = value as Partial<OnlineRequest>;
-  return typeof row.id === "string" && (row.kind === "client" || row.kind === "fournisseur") && typeof row.message === "string";
-}
-
 export async function saveOnlineRequest(request: OnlineRequest) {
-  const client = remote();
-  if (!client) {
-    fs.writeFileSync(path.join(folder(), `${request.id}.json`), JSON.stringify(request));
-    return;
-  }
-  await ensureBucket(client);
-  const { error } = await client.storage.from(BUCKET).upload(`${request.id}.json`, JSON.stringify(request), {
-    contentType: "application/json",
-    upsert: true,
+  await updatePlatform((platform) => {
+    platform.onlineRequests = [request, ...(platform.onlineRequests ?? [])].slice(0, 300);
   });
-  if (error) throw error;
-}
-
-async function readOne(client: SupabaseClient | null, name: string): Promise<OnlineRequest | null> {
-  if (!client) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync(path.join(folder(), name), "utf8")) as unknown;
-      return isRequest(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
-  }
-  const { data, error } = await client.storage.from(BUCKET).download(name);
-  if (error || !data) return null;
-  try {
-    const parsed = JSON.parse(await data.text()) as unknown;
-    return isRequest(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
 }
 
 export async function listOnlineRequests(): Promise<OnlineRequest[]> {
-  const client = remote();
-  const names = client
-    ? (await (async () => {
-        await ensureBucket(client);
-        const { data, error } = await client.storage.from(BUCKET).list("", { limit: 200 });
-        if (error) throw error;
-        return (data ?? []).map((file) => file.name).filter((name) => name.endsWith(".json"));
-      })())
-    : fs.existsSync(folder())
-      ? fs.readdirSync(folder()).filter((name) => name.endsWith(".json"))
-      : [];
-  const rows = await Promise.all(names.map((name) => readOne(client, name)));
-  return rows
-    .filter((row): row is OnlineRequest => Boolean(row))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const platform = await loadPlatform();
+  return [...(platform.onlineRequests ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function markOnlineRequestSeen(id: string) {
-  const safe = id.replace(/[^a-zA-Z0-9-]/g, "");
-  if (!safe) throw new Error("Demande introuvable.");
-  const client = remote();
-  const current = await readOne(client, `${safe}.json`);
-  if (!current) throw new Error("Demande introuvable.");
-  const next = { ...current, seenAt: current.seenAt ?? new Date().toISOString() };
-  if (!client) {
-    fs.writeFileSync(path.join(folder(), `${safe}.json`), JSON.stringify(next));
-    return next;
-  }
-  const { error } = await client.storage.from(BUCKET).upload(`${safe}.json`, JSON.stringify(next), {
-    contentType: "application/json",
-    upsert: true,
+  let updated: OnlineRequest | null = null;
+  await updatePlatform((platform) => {
+    const item = (platform.onlineRequests ?? []).find((row) => row.id === id);
+    if (!item) return;
+    item.seenAt = item.seenAt ?? new Date().toISOString();
+    updated = { ...item };
   });
-  if (error) throw error;
-  return next;
+  if (!updated) throw new Error("Demande introuvable.");
+  return updated;
 }
-

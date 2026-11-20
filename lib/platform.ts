@@ -22,10 +22,25 @@ export interface GarageWorkspace {
   state: State;
 }
 
+export interface OnlineRequest {
+  id: string;
+  kind: "client" | "fournisseur";
+  name: string;
+  phone: string;
+  email: string;
+  subject: string;
+  vehicle: string;
+  category: string;
+  message: string;
+  createdAt: string;
+  seenAt: string | null;
+}
+
 export interface Platform {
   version: 4;
   garages: GarageWorkspace[];
   accounts: Account[];
+  onlineRequests: OnlineRequest[];
 }
 
 export interface PublicAccount {
@@ -105,6 +120,7 @@ export function createPlatform(): Platform {
     version: 4,
     garages: [{ id: GARAGE_ID, name: state.settings.name, slug: "auto-hr", state }],
     accounts: demoAccounts(GARAGE_ID),
+    onlineRequests: [],
   };
 }
 
