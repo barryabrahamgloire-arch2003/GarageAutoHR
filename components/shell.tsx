@@ -12,6 +12,7 @@ import type { Role } from "@/lib/types";
 const LINKS: Record<Role, { href: string; label: string; match: (path: string) => boolean }[]> = {
   reception: [
     { href: "/", label: "Accueil", match: (path) => path === "/" },
+    { href: "/demandes", label: "Demandes", match: (path) => path.startsWith("/demandes") },
     { href: "/nouveau", label: "Nouvel ordre", match: (path) => path.startsWith("/nouveau") },
   ],
   atelier: [{ href: "/", label: "Atelier", match: (path) => path === "/" || path.startsWith("/dossier") }],

@@ -766,7 +766,18 @@ body{background:#0D141C;color:#F1E8D5}
 .crew__body p{margin:0;color:rgba(241,232,213,.88);font-size:1.02rem;line-height:1.5}
 .crew__body strong{color:#F1E8D5;font-weight:700}
 @media(max-width:980px){.crew{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.crew{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .crew-scroll{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+  .crew{display:flex;width:max-content;gap:14px;padding-inline:2px}
+  .crew__card{width:min(78vw,280px);flex:none;scroll-snap-align:start}
+  .team-band{display:flex;flex-direction:column}
+  .team-band img{height:190px}
+  .team-band::after{display:none}
+  .team-band__overlay{position:static;flex-direction:column;align-items:flex-start;gap:14px;padding:18px 16px 20px;background:#f3f1ed}
+  .team-band__overlay h3{font-size:1.28rem;line-height:1.08}
+  .team-band__overlay p.statement{font-size:.98rem;line-height:1.5;max-width:none;margin-top:8px}
+  .team-band__overlay .btn{width:100%;justify-content:center}
+}
 /* Mission, engagements et ambition : même voix */
 .about__text p.statement,
 .team-band__overlay p.statement,
@@ -781,6 +792,10 @@ body{background:#0D141C;color:#F1E8D5}
 .about__text p.statement strong,
 .section .cards-grid p.statement strong{font-weight:700;color:#F1E8D5}
 .team-band__overlay p.statement strong{font-weight:700;color:#17212A}
+@media(max-width:760px){
+  .team-band__overlay p.statement{font-size:.98rem;line-height:1.5;max-width:100%}
+  .team-band__overlay h3{font-size:1.28rem}
+}
 </style>
 <noscript><style>.page{display:block!important}.preloader,.morph,.burger{display:none!important}</style></noscript>
 </head>
@@ -1354,13 +1369,45 @@ body{background:#0D141C;color:#F1E8D5}
 
 
 
+    <section class="section">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Nos valeurs</span>
+          <h2 class="section-title">Les valeurs qui guident <span class="accent">nos actes</span></h2>
+        </div>
+        <div class="cards-grid cards-grid--2">
+          <article class="card" data-reveal>
+            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></div>
+            <h3 class="card__title">Fiabilité &amp; intégrité</h3>
+            <p class="card__text">Nous tenons nos engagements, expliquons nos interventions avec transparence et agissons avec honnêteté à chaque étape.</p>
+          </article>
+          <article class="card" data-reveal style="--d:.1s">
+            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <h3 class="card__title">Compétence</h3>
+            <p class="card__text">Le savoir-faire technique et la rigueur professionnelle sont au cœur de l’entretien, du diagnostic et de la réparation de chaque véhicule.</p>
+          </article>
+          <article class="card" data-reveal style="--d:.2s">
+            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></div>
+            <h3 class="card__title">Innovation &amp; réactivité</h3>
+            <p class="card__text">Nous faisons évoluer nos méthodes et nos outils pour apporter des réponses efficaces, adaptées aux besoins des véhicules et des flottes.</p>
+          </article>
+          <article class="card" data-reveal style="--d:.3s">
+            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h3 class="card__title">Responsabilité</h3>
+            <p class="card__text">Particuliers comme gestionnaires de flottes : chaque client bénéficie du même standard, du conseil d'entretien personnalisé à la priorité d'intervention.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="equipe">
       <div class="container">
         <div class="section-head" data-reveal>
           <span class="eyebrow">L'équipe</span>
           <h2 class="section-title">Les femmes et les hommes de<br><span class="accent">Garage Auto HR Conakry</span></h2>
-          <p class="section-sub">Douze métiers, une même exigence d'expertise, de qualité, de sûreté et de confort, à Kipé.</p>
+          <p class="section-sub">Onze métiers, une même exigence d'expertise, de qualité, de sûreté et de confort, à Kipé.</p>
         </div>
+        <div class="crew-scroll">
         <div class="crew">
           <article class="crew__card" data-reveal>
             <img src="/equipe/gloria.jpg" alt="Lawson Body Gloria, directrice administrative et financière" loading="lazy">
@@ -1374,13 +1421,6 @@ body{background:#0D141C;color:#F1E8D5}
             <div class="crew__body">
               <h3>Foulématou Traoré</h3>
               <p><strong>Responsable commercial et relation client.</strong> Accueil, devis et suivi des clients.</p>
-            </div>
-          </article>
-          <article class="crew__card" data-reveal style="--d:.2s">
-            <div class="crew__mark" role="img" aria-label="Franck Touré, responsable magasin et stock">FT</div>
-            <div class="crew__body">
-              <h3>Franck Touré</h3>
-              <p><strong>Responsable magasin et stock.</strong> Commandes, inventaires et pièces détachées.</p>
             </div>
           </article>
           <article class="crew__card" data-reveal style="--d:.3s">
@@ -1447,36 +1487,6 @@ body{background:#0D141C;color:#F1E8D5}
             </div>
           </article>
         </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-head" data-reveal>
-          <span class="eyebrow">Nos valeurs</span>
-          <h2 class="section-title">Les valeurs qui guident <span class="accent">nos actes</span></h2>
-        </div>
-        <div class="cards-grid cards-grid--2">
-          <article class="card" data-reveal>
-            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></div>
-            <h3 class="card__title">Fiabilité &amp; intégrité</h3>
-            <p class="card__text">Nous tenons nos engagements, expliquons nos interventions avec transparence et agissons avec honnêteté à chaque étape.</p>
-          </article>
-          <article class="card" data-reveal style="--d:.1s">
-            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <h3 class="card__title">Compétence</h3>
-            <p class="card__text">Le savoir-faire technique et la rigueur professionnelle sont au cœur de l’entretien, du diagnostic et de la réparation de chaque véhicule.</p>
-          </article>
-          <article class="card" data-reveal style="--d:.2s">
-            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></div>
-            <h3 class="card__title">Innovation &amp; réactivité</h3>
-            <p class="card__text">Nous faisons évoluer nos méthodes et nos outils pour apporter des réponses efficaces, adaptées aux besoins des véhicules et des flottes.</p>
-          </article>
-          <article class="card" data-reveal style="--d:.3s">
-            <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-            <h3 class="card__title">Responsabilité</h3>
-            <p class="card__text">Particuliers comme gestionnaires de flottes : chaque client bénéficie du même standard, du conseil d'entretien personnalisé à la priorité d'intervention.</p>
-          </article>
         </div>
       </div>
     </section>
@@ -1954,14 +1964,7 @@ body{background:#0D141C;color:#F1E8D5}
   });
 
   /* ---------- Formulaire contact (FormSubmit → mail pro) ---------- */
-  const form = $('#contactForm'), btn = $('#submitBtn');
-  if(form){
-    form.addEventListener('submit', ()=>{
-      btn.disabled = true;
-      btn.firstChild.textContent = 'Envoi en cours… ';
-      /* Laisse FormSubmit traiter l'envoi réel (action + method POST) */
-    });
-  }
+  /* formulaires branchés plus bas */
 
   /* ---------- Pop-up Fournisseur ---------- */
   const supplierModal = $('#supplierModal');
@@ -1985,14 +1988,59 @@ body{background:#0D141C;color:#F1E8D5}
   document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && supplierModal && supplierModal.classList.contains('is-open')) closeSupplier(); });
 
   /* ---------- Formulaire Fournisseur (FormSubmit → mail pro) ---------- */
-  const supForm = $('#supplierForm'), supBtn = $('#supSubmitBtn');
-  if(supForm){
-    supForm.addEventListener('submit', ()=>{
-      supBtn.disabled = true;
-      supBtn.firstChild.textContent = 'Envoi en cours… ';
-      /* Laisse FormSubmit traiter l'envoi réel (action + method POST) */
+  const DEMANDES_API = 'https://garage-auto-hr.vercel.app/api/demandes';
+  function fieldValue(form, name){
+    const el = form.elements.namedItem(name);
+    return el && 'value' in el ? String(el.value).trim() : '';
+  }
+  function bindDemand(form, button, build, done){
+    if(!form || !button) return;
+    form.addEventListener('submit', async (event)=>{
+      event.preventDefault();
+      if(typeof form.reportValidity === 'function' && !form.reportValidity()) return;
+      const payload = build();
+      const note = form.querySelector('.form__note');
+      button.disabled = true;
+      button.firstChild.textContent = 'Envoi en cours… ';
+      try {
+        await Promise.race([
+          fetch(DEMANDES_API, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)}),
+          new Promise((resolve)=>setTimeout(resolve, 4000))
+        ]);
+      } catch (error) {}
+      if(note) note.textContent = done;
+      form.submit();
     });
   }
+  bindDemand($('#contactForm'), $('#submitBtn'), function(){
+    const form = $('#contactForm');
+    return {
+      kind: 'client',
+      name: fieldValue(form, 'nom'),
+      phone: fieldValue(form, 'tel'),
+      email: fieldValue(form, 'email'),
+      subject: fieldValue(form, 'service'),
+      vehicle: fieldValue(form, 'vehicule'),
+      category: '',
+      message: fieldValue(form, 'message'),
+      website: fieldValue(form, '_honey')
+    };
+  }, 'Demande envoyée. Réponse sous 24h ouvrées.');
+  bindDemand($('#supplierForm'), $('#supSubmitBtn'), function(){
+    const form = $('#supplierForm');
+    const person = fieldValue(form, 'contact');
+    return {
+      kind: 'fournisseur',
+      name: fieldValue(form, 'societe') + (person ? ' — ' + person : ''),
+      phone: fieldValue(form, 'tel'),
+      email: fieldValue(form, 'email'),
+      subject: fieldValue(form, 'categorie'),
+      vehicle: '',
+      category: fieldValue(form, 'categorie'),
+      message: fieldValue(form, 'offre'),
+      website: fieldValue(form, '_honey')
+    };
+  }, 'Candidature envoyée. Réponse sous 72h ouvrées.');
 
   /* ---------- Année ---------- */
   $('#year').textContent = new Date().getFullYear();
