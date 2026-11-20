@@ -40,7 +40,7 @@ export function Shell({ children }: { children: ReactNode }) {
     return (
       <div className="grid min-h-dvh place-items-center px-6">
         <div className="glass max-w-md p-8 text-center">
-          <Image src="/logo.jpg" alt="Garage Auto HR" width={72} height={72} className="mx-auto rounded-2xl" />
+          <Image src="/logo.png" alt="Garage Auto HR" width={72} height={72} className="mx-auto" />
           <h1 className="mt-4 text-2xl font-bold">Espace inaccessible</h1>
           <p className="quiet mt-3">{error || "Reconnectez-vous pour ouvrir votre interface."}</p>
           <button className="btn mt-5" type="button" onClick={() => refresh().catch(() => undefined)}>
@@ -70,7 +70,7 @@ function Sidebar() {
   return (
     <aside className="sidebar no-print">
       <Link href="/" className="side-brand">
-        <Image src="/logo.jpg" alt="" width={52} height={52} />
+        <Image src="/logo.png" alt="" width={56} height={56} />
         <span>
           <strong>Garage Auto HR</strong>
           <small>{state.settings.city}</small>

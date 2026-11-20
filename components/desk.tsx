@@ -94,7 +94,7 @@ function Header({ kicker, title, text, action, stats }: { kicker: string; title:
   return (
     <div className="grid gap-4">
       <header className="home-hero">
-        <Image src="/logo.jpg" alt="Garage Auto HR" width={88} height={88} className="home-logo" />
+        <Image src="/logo.png" alt="Garage Auto HR" width={88} height={88} className="home-logo" />
         <div>
           <p className="kicker">{kicker}</p>
           <h1 className="mt-1">{title}</h1>

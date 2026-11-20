@@ -118,7 +118,7 @@ export function AdminScreen() {
   return (
     <div className="admin-frame">
       <header className="admin-bar">
-        <Image src="/logo.jpg" alt="" width={48} height={48} />
+        <Image src="/logo.png" alt="" width={48} height={48} />
         <div>
           <strong className="block leading-none">Garage Auto HR</strong>
           <small className="text-[#b7aea4]">Superadmin</small>

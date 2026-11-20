@@ -5,7 +5,7 @@ const PUBLIC_PATHS = new Set(["/connexion", "/api/login", "/api/logout"]);
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (pathname.startsWith("/_next") || pathname === "/logo.jpg" || pathname === "/favicon.ico") {
+  if (pathname.startsWith("/_next") || pathname === "/logo.png" || pathname === "/favicon.ico") {
     return NextResponse.next();
   }
   if (pathname === "/api/demandes" && (request.method === "POST" || request.method === "OPTIONS")) {
@@ -29,5 +29,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.jpg).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.png).*)"],
 };

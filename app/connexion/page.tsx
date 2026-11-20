@@ -13,7 +13,7 @@ export default function LoginPage() {
   return (
     <div className="auth-grid">
       <section className="auth-brand">
-        <Image src="/logo.jpg" alt="Logo du Garage Auto HR" width={128} height={128} priority />
+        <Image src="/logo.png" alt="Logo du Garage Auto HR" width={128} height={128} priority />
         <div>
           <p className="kicker !text-[#e7b2ad]">Kipé, Conakry</p>
           <h1 className="mt-2">Garage Auto HR</h1>
