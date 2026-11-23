@@ -1,37 +1,72 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "cn";
+import type { IconifyIcon } from "@iconify/react";
+import home from "@iconify-icons/line-md/home";
+import email from "@iconify-icons/line-md/email";
+import plus from "@iconify-icons/line-md/plus";
+import engine from "@iconify-icons/line-md/engine";
+import clipboard from "@iconify-icons/line-md/clipboard-list";
+import briefcase from "@iconify-icons/line-md/briefcase";
+import documents from "@iconify-icons/line-md/document-list";
+import steering from "@iconify-icons/line-md/steering";
+import logoutIcon from "@iconify-icons/line-md/logout";
+import foldLeft from "@iconify-icons/line-md/menu-fold-left";
+import foldRight from "@iconify-icons/line-md/menu-fold-right";
+import chevronUp from "@iconify-icons/line-md/chevron-up";
 import { useGarage } from "@/components/garage-provider";
+import { Gear, MotionIcon } from "@/components/motion-icon";
 import { spaceLabel } from "@/lib/accounts";
 import type { Role } from "@/lib/types";
 
-const LINKS: Record<Role, { href: string; label: string; match: (path: string) => boolean }[]> = {
+const LINKS: Record<Role, { href: string; label: string; icon: IconifyIcon; match: (path: string) => boolean }[]> = {
   reception: [
-    { href: "/", label: "Accueil", match: (path) => path === "/" },
-    { href: "/demandes", label: "Demandes", match: (path) => path.startsWith("/demandes") },
-    { href: "/nouveau", label: "Nouvel ordre", match: (path) => path.startsWith("/nouveau") },
+    { href: "/", label: "Accueil", icon: home, match: (path) => path === "/" },
+    { href: "/demandes", label: "Demandes", icon: email, match: (path) => path.startsWith("/demandes") },
+    { href: "/nouveau", label: "Nouvel ordre", icon: plus, match: (path) => path.startsWith("/nouveau") },
   ],
-  atelier: [{ href: "/", label: "Atelier", match: (path) => path === "/" || path.startsWith("/dossier") }],
+  atelier: [{ href: "/", label: "Atelier", icon: engine, match: (path) => path === "/" || path.startsWith("/dossier") }],
   comptabilite: [
-    { href: "/", label: "Accueil", match: (path) => path === "/" || path.startsWith("/dossier") },
-    { href: "/grille", label: "Grille", match: (path) => path.startsWith("/grille") },
+    { href: "/", label: "Accueil", icon: home, match: (path) => path === "/" || path.startsWith("/dossier") },
+    { href: "/grille", label: "Grille", icon: clipboard, match: (path) => path.startsWith("/grille") },
   ],
-  achats: [{ href: "/", label: "À acheter", match: () => true }],
-  direction: [{ href: "/", label: "Dossiers", match: (path) => path === "/" || path.startsWith("/dossier") }],
-  client: [{ href: "/", label: "Mes voitures", match: () => true }],
+  achats: [{ href: "/", label: "À acheter", icon: briefcase, match: () => true }],
+  direction: [{ href: "/", label: "Dossiers", icon: documents, match: (path) => path === "/" || path.startsWith("/dossier") }],
+  client: [{ href: "/", label: "Mes voitures", icon: steering, match: () => true }],
 };
 
 export function Shell({ children }: { children: ReactNode }) {
-  const { state, profile, loading, error, refresh } = useGarage();
+  const { state, profile, loading, busy, error, refresh } = useGarage();
+  const [rail, setRail] = useState(false);
+  const [barAway, setBarAway] = useState(false);
+
+  useEffect(() => {
+    setRail(window.localStorage.getItem("gahr-rail") === "1");
+    setBarAway(window.localStorage.getItem("gahr-tab") === "1");
+  }, []);
+
+  function toggleRail() {
+    setRail((value) => {
+      window.localStorage.setItem("gahr-rail", value ? "0" : "1");
+      return !value;
+    });
+  }
+
+  function toggleBar() {
+    setBarAway((value) => {
+      window.localStorage.setItem("gahr-tab", value ? "0" : "1");
+      return !value;
+    });
+  }
 
   if (loading && !state) {
     return (
       <div className="grid min-h-dvh place-items-center">
-        <p className="quiet">Ouverture de l’espace…</p>
+        <p className="busy-inline"><Gear spinning /> Ouverture de l’espace…</p>
       </div>
     );
   }
@@ -52,58 +87,78 @@ export function Shell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="app-frame">
-      <Sidebar />
+    <div className={cn("app-frame", rail && "is-rail")}>
+      <Sidebar compact={rail} onToggle={toggleRail} />
       <div className="app-main">
         {profile.impersonating ? <ImpersonationBanner name={profile.name} role={profile.role} /> : null}
         {children}
       </div>
-      <BottomNav />
+      <BottomNav away={barAway} onToggle={toggleBar} />
+      {busy ? (
+        <p className="busy-flag" role="status">
+          <Gear spinning /> Action en cours
+        </p>
+      ) : null}
     </div>
   );
 }
 
-function Sidebar() {
+function Sidebar({ compact, onToggle }: { compact: boolean; onToggle: () => void }) {
   const path = usePathname();
   const { state, profile, role, logout } = useGarage();
   if (!state || !profile) return null;
   return (
     <aside className="sidebar no-print">
-      <Link href="/" className="side-brand">
-        <Image src="/logo.png" alt="" width={56} height={56} />
-        <span>
-          <strong>Garage Auto HR</strong>
-          <small>{state.settings.city}</small>
-        </span>
-      </Link>
+      <div className="side-top">
+        <Link href="/" className="side-brand" aria-label="Accueil">
+          <Image src="/logo.png" alt="" width={56} height={56} />
+          <span className="side-copy">
+            <strong>Garage Auto HR</strong>
+            <small>{state.settings.city}</small>
+          </span>
+        </Link>
+        <button className="side-fold" type="button" onClick={onToggle} aria-label={compact ? "Ouvrir le menu" : "Réduire le menu"}>
+          <MotionIcon icon={compact ? foldRight : foldLeft} label={compact ? "Ouvrir" : "Réduire"} />
+        </button>
+      </div>
       <nav className="side-nav" aria-label="Espace">
         {LINKS[role].map((link) => (
-          <Link key={link.href} href={link.href} className={cn("side-link", link.match(path) && "on")}>
-            {link.label}
+          <Link key={link.href} href={link.href} className={cn("side-link", link.match(path) && "on")} title={link.label}>
+            <MotionIcon icon={link.icon} label={link.label} />
+            <span className="side-copy">{link.label}</span>
           </Link>
         ))}
       </nav>
       <div className="side-user">
-        <strong>{profile.name}</strong>
-        <small>{spaceLabel(role)}</small>
-        <button className="btn-line" type="button" onClick={() => logout().catch(() => undefined)}>
-          Sortir
+        <strong className="side-copy">{profile.name}</strong>
+        <small className="side-copy">{spaceLabel(role)}</small>
+        <button className="btn-line" type="button" title="Sortir" onClick={() => logout().catch(() => undefined)}>
+          <MotionIcon icon={logoutIcon} label="Sortir" />
+          <span className="side-copy">Sortir</span>
         </button>
       </div>
     </aside>
   );
 }
 
-function BottomNav() {
+function BottomNav({ away, onToggle }: { away: boolean; onToggle: () => void }) {
   const path = usePathname();
-  const { role } = useGarage();
+  const { role, logout } = useGarage();
   return (
-    <nav className="tabbar no-print" aria-label="Menu">
-      {LINKS[role].map((link) => (
-        <Link key={link.href + link.label} href={link.href} className={link.match(path) ? "on" : ""}>
-          {link.label}
-        </Link>
-      ))}
+    <nav className={cn("tabbar no-print", away && "is-away")} aria-label="Menu">
+      <button className="tab-handle" type="button" onClick={onToggle} aria-label={away ? "Ouvrir le menu" : "Réduire le menu"}>
+        <MotionIcon icon={away ? chevronUp : foldLeft} />
+      </button>
+      <div className="tab-links">
+        {LINKS[role].map((link) => (
+          <Link key={link.href + link.label} href={link.href} className={link.match(path) ? "on" : ""} title={link.label} aria-label={link.label}>
+            <MotionIcon icon={link.icon} label={link.label} />
+          </Link>
+        ))}
+        <button type="button" title="Sortir" aria-label="Sortir" onClick={() => logout().catch(() => undefined)}>
+          <MotionIcon icon={logoutIcon} label="Sortir" />
+        </button>
+      </div>
     </nav>
   );
 }

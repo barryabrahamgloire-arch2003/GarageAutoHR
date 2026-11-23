@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useGarage } from "@/components/garage-provider";
 import { Empty } from "@/components/kit";
+import { Popup } from "@/components/popup";
 import { gnf, parseAmount } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -10,6 +11,7 @@ export function PriceGrid() {
   const { state, role, run, actorName } = useGarage();
   const [query, setQuery] = useState("");
   const [drafts, setDrafts] = useState<Record<string, { price: string; stock: string }>>({});
+  const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState<Product>({
     id: "",
     name: "",
@@ -43,7 +45,10 @@ export function PriceGrid() {
         <h1 className="display mt-2">Grille et stock</h1>
         <p className="quiet mt-3 max-w-xl">Le prix de vente sert à la facture. Le prix d’achat, lui, est noté par les achats.</p>
       </header>
-      <input className="field max-w-md" value={query} placeholder="Chercher une pièce" onChange={(event) => setQuery(event.target.value)} />
+      <div className="flex flex-wrap items-center gap-3">
+        <input className="field max-w-md" value={query} placeholder="Chercher une pièce" onChange={(event) => setQuery(event.target.value)} />
+        <button className="btn" type="button" onClick={() => setCreateOpen(true)}>Nouveau produit</button>
+      </div>
       <div className="grid gap-3">
         {products.map((product) => {
           const draft = draftOf(product);
@@ -77,23 +82,26 @@ export function PriceGrid() {
           );
         })}
       </div>
-      <form
-        className="glass grid gap-3 p-5 md:grid-cols-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          run({ type: "saveProduct", payload: { product: creating, actor: actorName } }, "Produit ajouté").then((ok) => {
-            if (ok) setCreating({ id: "", name: "", reference: "", category: "Pièces", price: 0, stock: 0, unit: "pièce" });
-          });
-        }}
-      >
-        <h2 className="md:col-span-2">Nouveau produit</h2>
-        <input className="field" placeholder="Nom" value={creating.name} onChange={(event) => setCreating({ ...creating, name: event.target.value })} />
-        <input className="field" placeholder="Référence" value={creating.reference} onChange={(event) => setCreating({ ...creating, reference: event.target.value })} />
-        <input className="field" placeholder="Catégorie" value={creating.category} onChange={(event) => setCreating({ ...creating, category: event.target.value })} />
-        <input className="field" placeholder="Prix" inputMode="numeric" value={creating.price || ""} onChange={(event) => setCreating({ ...creating, price: parseAmount(event.target.value) ?? 0 })} />
-        <input className="field" placeholder="Stock" inputMode="numeric" value={creating.stock || ""} onChange={(event) => setCreating({ ...creating, stock: parseAmount(event.target.value) ?? 0 })} />
-        <button className="btn" type="submit">Ajouter à la grille</button>
-      </form>
+      <Popup open={createOpen} title="Nouveau produit" onClose={() => setCreateOpen(false)}>
+        <form
+          className="grid gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            run({ type: "saveProduct", payload: { product: creating, actor: actorName } }, "Produit ajouté").then((ok) => {
+              if (!ok) return;
+              setCreating({ id: "", name: "", reference: "", category: "Pièces", price: 0, stock: 0, unit: "pièce" });
+              setCreateOpen(false);
+            });
+          }}
+        >
+          <input className="field" placeholder="Nom" value={creating.name} onChange={(event) => setCreating({ ...creating, name: event.target.value })} />
+          <input className="field" placeholder="Référence" value={creating.reference} onChange={(event) => setCreating({ ...creating, reference: event.target.value })} />
+          <input className="field" placeholder="Catégorie" value={creating.category} onChange={(event) => setCreating({ ...creating, category: event.target.value })} />
+          <input className="field" placeholder="Prix" inputMode="numeric" value={creating.price || ""} onChange={(event) => setCreating({ ...creating, price: parseAmount(event.target.value) ?? 0 })} />
+          <input className="field" placeholder="Stock" inputMode="numeric" value={creating.stock || ""} onChange={(event) => setCreating({ ...creating, stock: parseAmount(event.target.value) ?? 0 })} />
+          <button className="btn" type="submit">Ajouter à la grille</button>
+        </form>
+      </Popup>
     </div>
   );
 }

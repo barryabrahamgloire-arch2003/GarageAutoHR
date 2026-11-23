@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { MessageCircle } from "lucide-react";
+import { Gear } from "@/components/motion-icon";
 import { STATUSES, type Status } from "@/lib/types";
 import { STATUS_LABEL, whatsappHref } from "@/lib/format";
 import type { Talk } from "@/lib/talk";
@@ -174,6 +175,33 @@ export function SignatureView({ image, name }: { image?: string; name?: string }
         />
       ) : null}
     </div>
+  );
+}
+
+export function WhatsAppList({ talks }: { talks: Talk[] }) {
+  const [phase, setPhase] = useState<"idle" | "spin" | "open">("idle");
+  if (!talks.length) return null;
+  function toggle() {
+    if (phase === "open") {
+      setPhase("idle");
+      return;
+    }
+    setPhase("spin");
+    window.setTimeout(() => setPhase("open"), 680);
+  }
+  return (
+    <section className="no-print">
+      <button className="icon-btn" type="button" onClick={toggle} aria-expanded={phase === "open"} aria-label="Contacts WhatsApp">
+        <Gear spinning={phase === "spin"} />
+      </button>
+      {phase === "open" ? (
+        <div className="chips pop-in">
+          {talks.map((talk) => (
+            <WhatsApp key={`${talk.role}-${talk.name}`} talk={talk} />
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 

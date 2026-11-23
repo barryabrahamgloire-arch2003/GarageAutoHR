@@ -4,7 +4,8 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useGarage } from "@/components/garage-provider";
 import { ReceptionEditor, ReportEditor, WorkshopEditor } from "@/components/forms";
-import { Empty, PaperRow, SignatureView, StatusRail, WhatsApp } from "@/components/kit";
+import { Empty, PaperRow, SignatureView, StatusRail, WhatsAppList } from "@/components/kit";
+import { Popup } from "@/components/popup";
 import { emptyWorkshop, liveInvoice, moneyOf, reportDraft } from "@/lib/domain";
 import { formatDay, formatWhen, gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { byPost, clientOf } from "@/lib/selectors";
@@ -62,18 +63,15 @@ export function DossierScreen({ id }: { id: string }) {
       </header>
       {role === "client" ? null : (<>
 
-      {talks.length ? (
-        <section className="no-print">
-          <p className="kicker mb-2">Écrire sur WhatsApp</p>
-          <div className="chips">
-            {talks.map((talk) => (
-              <WhatsApp key={`${talk.role}-${talk.name}`} talk={talk} />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <WhatsAppList talks={talks} />
 
-      {bill ? <DepositBanner dossier={dossier} covered={bill.covered} due={bill.depositDue} paid={bill.paid} balance={bill.balance} canRecord={canMoney} /> : null}
+      {role === "atelier" && (dossier.status === "diagnostic" || dossier.status === "facture_prete") ? (
+        <p className="glass p-5 text-sm">La réparation attend le règlement confirmé par la comptabilité.</p>
+      ) : null}
+      {role === "atelier" && dossier.status === "paiement_effectue" ? (
+        <p className="glass p-5 text-sm">Le règlement est confirmé. La réparation peut commencer.</p>
+      ) : null}
+      {canMoney && bill ? <DepositBanner dossier={dossier} covered={bill.covered} due={bill.depositDue} paid={bill.paid} balance={bill.balance} canRecord={canMoney} /> : null}
 
           <PublishStatus dossier={dossier} />
           <DirectionComments dossier={dossier} />
@@ -108,7 +106,7 @@ export function DossierScreen({ id }: { id: string }) {
 
           <WorkshopBlock dossier={dossier} canEdit={canWorkshop} />
           <PartsBlock dossier={dossier} canAdd={canWorkshop} canMoney={canMoney} />
-          {(canMoney || dossier.invoice) ? <InvoiceBlock dossier={dossier} canMoney={canMoney} /> : null}
+          {canMoney ? <InvoiceBlock dossier={dossier} canMoney={canMoney} /> : null}
           <ReportBlock dossier={dossier} canEdit={canReport} />
           {(role === "direction" || role === "reception") ? <Meeting dossier={dossier} /> : null}
           <Journal dossier={dossier} />
@@ -134,11 +132,12 @@ function Sheet({
     <section className="glass p-6">
       <div className="mb-2 flex items-center justify-between gap-3">
         <h2 className="text-lg">{title}</h2>
-        {action && !editing ? (
+        {action ? (
           <button className="btn-line" type="button" onClick={() => setEditing(true)}>Modifier</button>
         ) : null}
       </div>
-      {editing ? (
+      <div>{children}</div>
+      <Popup open={editing} title="Ordre de réception" onClose={() => setEditing(false)}>
         <ReceptionEditor
           initial={dossier.reception}
           includeDiagnostic
@@ -151,9 +150,7 @@ function Sheet({
             if (ok) setEditing(false);
           }}
         />
-      ) : (
-        <div>{children}</div>
-      )}
+      </Popup>
     </section>
   );
 }
@@ -167,11 +164,11 @@ function WorkshopBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolea
     <section className="glass p-6">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg">Fiche d’atelier</h2>
-        {canEdit && sheet && !editing ? (
-          <button className="btn-line" type="button" onClick={() => setEditing(true)}>Modifier</button>
+        {canEdit ? (
+          <button className="btn-line" type="button" onClick={() => setEditing(true)}>{sheet ? "Modifier" : "Remplir"}</button>
         ) : null}
       </div>
-      {editing ? (
+      <Popup open={editing} title="Fiche d’atelier" onClose={() => setEditing(false)}>
         <WorkshopEditor
           initial={sheet ?? emptyWorkshop(dossier, actorName, chef)}
           onCancel={() => setEditing(false)}
@@ -180,7 +177,8 @@ function WorkshopBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolea
             if (ok) setEditing(false);
           }}
         />
-      ) : sheet ? (
+      </Popup>
+      {sheet ? (
         <div>
           <PaperRow label="Début" value={`${formatDay(sheet.startDate)} ${sheet.startTime}`.trim()} />
           <PaperRow label="Fin" value={`${formatDay(sheet.endDate)} ${sheet.endTime}`.trim()} />
@@ -203,10 +201,7 @@ function WorkshopBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolea
           </div>
         </div>
       ) : (
-        <div>
-          <p className="quiet">La fiche d’atelier n’est pas encore ouverte.</p>
-          {canEdit ? <button className="btn mt-3" type="button" onClick={() => setEditing(true)}>Remplir la fiche</button> : null}
-        </div>
+        <p className="quiet">La fiche d’atelier n’est pas encore ouverte.</p>
       )}
     </section>
   );
@@ -227,64 +222,62 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg">Éléments à traiter</h2>
         {canAdd && !frozen ? (
-          <button className="btn-line" type="button" onClick={() => setOpen((value) => !value)}>Ajouter</button>
+          <button className="btn-line" type="button" onClick={() => setOpen(true)}>Ajouter</button>
         ) : null}
       </div>
-      <div className={`fold ${open ? "open" : ""}`}>
-        <div>
-          <form
-            className="mb-4 grid gap-3 md:grid-cols-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const product = state.products.find((item) => item.id === productId);
-              run({
-                type: "addPart",
-                payload: {
-                  dossierId: dossier.id,
-                  productId,
-                  label: label || product?.name || "",
-                  reference: product?.reference ?? "",
-                  qty: Number(qty),
-                  constat,
-                  actor: actorName,
-                },
-              }, "Pièce ajoutée").then((ok) => {
-                if (!ok) return;
-                setLabel("");
-                setConstat("");
-                setOpen(false);
-              });
-            }}
-          >
-            <label className="grid gap-1.5">
-              <span className="label">Produit de la grille</span>
-              <select className="field" value={productId} onChange={(event) => {
-                setProductId(event.target.value);
-                const product = state.products.find((item) => item.id === event.target.value);
-                if (product) setLabel(product.name);
-              }}>
-                <option value="">Hors grille</option>
-                {state.products.map((product) => (
-                  <option key={product.id} value={product.id}>{product.name} · stock {product.stock}</option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1.5">
-              <span className="label">Désignation</span>
-              <input className="field" value={label} onChange={(event) => setLabel(event.target.value)} />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="label">Quantité</span>
-              <input className="field" inputMode="numeric" value={qty} onChange={(event) => setQty(event.target.value)} />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="label">Constat</span>
-              <input className="field" value={constat} onChange={(event) => setConstat(event.target.value)} />
-            </label>
-            <button className="btn md:col-span-2" type="submit">Ajouter au dossier</button>
-          </form>
-        </div>
-      </div>
+      <Popup open={open} title="Ajouter une pièce" onClose={() => setOpen(false)}>
+        <form
+          className="grid gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const product = state.products.find((item) => item.id === productId);
+            run({
+              type: "addPart",
+              payload: {
+                dossierId: dossier.id,
+                productId,
+                label: label || product?.name || "",
+                reference: product?.reference ?? "",
+                qty: Number(qty),
+                constat,
+                actor: actorName,
+              },
+            }, "Pièce ajoutée").then((ok) => {
+              if (!ok) return;
+              setLabel("");
+              setConstat("");
+              setOpen(false);
+            });
+          }}
+        >
+          <label className="grid gap-1.5">
+            <span className="label">Produit de la grille</span>
+            <select className="field" value={productId} onChange={(event) => {
+              setProductId(event.target.value);
+              const product = state.products.find((item) => item.id === event.target.value);
+              if (product) setLabel(product.name);
+            }}>
+              <option value="">Hors grille</option>
+              {state.products.map((product) => (
+                <option key={product.id} value={product.id}>{product.name} · stock {product.stock}</option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1.5">
+            <span className="label">Désignation</span>
+            <input className="field" value={label} onChange={(event) => setLabel(event.target.value)} />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="label">Quantité</span>
+            <input className="field" inputMode="numeric" value={qty} onChange={(event) => setQty(event.target.value)} />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="label">Constat</span>
+            <input className="field" value={constat} onChange={(event) => setConstat(event.target.value)} />
+          </label>
+          <button className="btn" type="submit">Ajouter au dossier</button>
+        </form>
+      </Popup>
       <div className="grid gap-3">
         {dossier.parts.length ? dossier.parts.map((part) => (
           <PartRow key={part.id} part={part} dossier={dossier} canMoney={canMoney} frozen={frozen} />
@@ -312,10 +305,10 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
           <p className="quiet text-sm">{part.qty} × {part.reference || "sans réf."}{part.constat ? ` · ${part.constat}` : ""}</p>
           <p className="mt-1 text-sm">
             {part.served ? "Servi du stock" : product ? `Stock ${product.stock}` : "Hors grille"}
-            {purchase ? ` · achat ${purchase.status === "a_valider" ? "à valider" : purchase.status === "a_acheter" ? "à acheter" : purchase.status === "achete" ? `acheté ${purchase.boughtPrice !== null ? gnf(purchase.boughtPrice) : ""}` : "refusé"}` : ""}
+            {purchase ? ` · achat ${purchase.status === "a_valider" ? "à valider" : purchase.status === "a_acheter" ? "à acheter" : purchase.status === "achete" ? "acheté" : "refusé"}` : ""}
           </p>
         </div>
-        <p>{part.unitPrice > 0 ? gnf(part.unitPrice) : "Prix à fixer"}</p>
+        {canMoney ? <p>{part.unitPrice > 0 ? gnf(part.unitPrice) : "Prix à fixer"}</p> : null}
       </div>
       {canMoney && !frozen ? (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -331,7 +324,7 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
             </button>
           ) : null}
           {!part.served && !purchase ? (
-            <button className="btn-line" type="button" onClick={() => setAsk((value) => !value)}>Demander l’achat</button>
+            <button className="btn-line" type="button" onClick={() => setAsk(true)}>Demander l’achat</button>
           ) : null}
           {!part.served ? (
             <button className="btn-ghost" type="button" onClick={() => run({ type: "removePart", payload: { dossierId: dossier.id, partId: part.id, actor: actorName } }, "Pièce retirée")}>Retirer</button>
@@ -344,22 +337,20 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
           <button className="btn-line" type="button" onClick={() => run({ type: "refusePurchase", payload: { purchaseId: purchase.id, actor: actorName } }, "Achat refusé")}>Refuser</button>
         </div>
       ) : null}
-      <div className={`fold ${ask ? "open" : ""}`}>
-        <div>
-          <div className="mt-3 grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-            <input className="field" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} aria-label="Prix maximum" placeholder="Prix max" />
-            <input className="field" type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} aria-label="Échéance" />
-            <button className="btn" type="button" onClick={() => {
-              const amount = parseAmount(maxPrice);
-              if (amount === null) return;
-              run({
-                type: "requestPurchase",
-                payload: { dossierId: dossier.id, partId: part.id, qty: part.qty, maxPrice: amount, deadline, actor: actorName },
-              }, "Demande envoyée à la direction").then((ok) => { if (ok) setAsk(false); });
-            }}>Envoyer</button>
-          </div>
+      <Popup open={ask} title="Demander l’achat" onClose={() => setAsk(false)}>
+        <div className="grid gap-3">
+          <input className="field" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} aria-label="Prix maximum" placeholder="Prix max" />
+          <input className="field" type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} aria-label="Échéance" />
+          <button className="btn" type="button" onClick={() => {
+            const amount = parseAmount(maxPrice);
+            if (amount === null) return;
+            run({
+              type: "requestPurchase",
+              payload: { dossierId: dossier.id, partId: part.id, qty: part.qty, maxPrice: amount, deadline, actor: actorName },
+            }, "Demande envoyée à la direction").then((ok) => { if (ok) setAsk(false); });
+          }}>Envoyer</button>
         </div>
-      </div>
+      </Popup>
     </article>
   );
 }
@@ -367,6 +358,7 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
 function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boolean }) {
   const { state, run, actorName } = useGarage();
   const [labor, setLabor] = useState(String(dossier.labor || ""));
+  const [laborOpen, setLaborOpen] = useState(false);
   if (!state) return null;
   const invoice = liveInvoice(dossier, state.settings);
   const bill = moneyOf(invoice, dossier.depositPaid);
@@ -395,17 +387,24 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
       {frozen ? <p className="hint mt-3">Facture figée le {formatWhen(dossier.invoice?.readyAt ?? "")}.</p> : null}
       {canMoney && !frozen ? (
         <div className="no-print mt-4 flex flex-wrap gap-2">
-          <input className="field !w-40" inputMode="numeric" value={labor} onChange={(event) => setLabor(event.target.value)} aria-label="Main-d’œuvre" />
-          <button className="btn-line" type="button" onClick={() => {
-            const amount = parseAmount(labor);
-            if (amount === null) return;
-            run({ type: "setLabor", payload: { dossierId: dossier.id, labor: amount, actor: actorName } }, "Main-d’œuvre enregistrée");
-          }}>Main-d’œuvre</button>
+          <button className="btn-line" type="button" onClick={() => setLaborOpen(true)}>Main-d’œuvre</button>
           <button className="btn" type="button" onClick={() => run({ type: "markInvoiceReady", payload: { dossierId: dossier.id, actor: actorName } }, "Facture prête")}>
             Rendre la facture prête
           </button>
         </div>
       ) : null}
+      <Popup open={laborOpen} title="Main-d’œuvre" onClose={() => setLaborOpen(false)}>
+        <div className="grid gap-3">
+          <input className="field" inputMode="numeric" value={labor} onChange={(event) => setLabor(event.target.value)} aria-label="Main-d’œuvre" />
+          <button className="btn" type="button" onClick={() => {
+            const amount = parseAmount(labor);
+            if (amount === null) return;
+            run({ type: "setLabor", payload: { dossierId: dossier.id, labor: amount, actor: actorName } }, "Main-d’œuvre enregistrée").then((ok) => {
+              if (ok) setLaborOpen(false);
+            });
+          }}>Enregistrer</button>
+        </div>
+      </Popup>
       {canMoney && frozen && dossier.depositPaid === 0 && dossier.status !== "reparation_faite" ? (
         <button className="btn-ghost no-print mt-2" type="button" onClick={() => run({ type: "reopenInvoice", payload: { dossierId: dossier.id, actor: actorName } }, "Facture rouverte")}>
           Rouvrir la facture
@@ -439,22 +438,20 @@ function DepositBanner({
       <p className="text-sm">{locked ? "La réparation ne commence qu’après 70 % de la facture." : covered && dossier.status !== "reparation_faite" ? "Acompte reçu. L’atelier peut réparer." : "Paiement à jour."}</p>
       <p className="mt-1">Acompte {gnf(due)} · reçu {gnf(paid)} · reste {gnf(balance)}</p>
       {canRecord && balance > 0 && dossier.invoice ? (
-        <button className="btn-line no-print mt-3" type="button" onClick={() => setOpen((value) => !value)}>Enregistrer un paiement</button>
+        <button className="btn-line no-print mt-3" type="button" onClick={() => setOpen(true)}>Enregistrer un paiement</button>
       ) : null}
-      <div className={`fold ${open ? "open" : ""}`}>
-        <div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <input className="field !w-48" inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />
-            <button className="btn" type="button" onClick={() => {
-              const value = parseAmount(amount);
-              if (value === null) return;
-              run({ type: "recordDeposit", payload: { dossierId: dossier.id, amount: value, actor: actorName } }, "Paiement enregistré").then((ok) => {
-                if (ok) setOpen(false);
-              });
-            }}>Encaisser</button>
-          </div>
+      <Popup open={open} title="Encaisser" onClose={() => setOpen(false)}>
+        <div className="grid gap-3">
+          <input className="field" inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />
+          <button className="btn" type="button" onClick={() => {
+            const value = parseAmount(amount);
+            if (value === null) return;
+            run({ type: "recordDeposit", payload: { dossierId: dossier.id, amount: value, actor: actorName } }, "Paiement enregistré").then((ok) => {
+              if (ok) setOpen(false);
+            });
+          }}>Encaisser</button>
         </div>
-      </div>
+      </Popup>
     </section>
   );
 }
@@ -465,14 +462,14 @@ function ReportBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolean 
   if (!state) return null;
   const report = dossier.report;
   const director = byPost(state, "Directeur technique")?.name ?? "";
-  const payable = dossier.invoice ? moneyOf(dossier.invoice, dossier.depositPaid).covered : false;
+  const payable = dossier.status === "paiement_effectue" || dossier.status === "reparation_faite" || (dossier.invoice ? moneyOf(dossier.invoice, dossier.depositPaid).covered : false);
   return (
     <section className="glass p-6">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg">Rapport d’activité</h2>
-        {canEdit && report && !editing ? <button className="btn-line" type="button" onClick={() => setEditing(true)}>Modifier</button> : null}
+        {canEdit ? <button className="btn-line" type="button" onClick={() => setEditing(true)}>{report ? "Modifier" : "Rédiger"}</button> : null}
       </div>
-      {editing ? (
+      <Popup open={editing} title="Rapport d’activité" onClose={() => setEditing(false)}>
         <ReportEditor
           initial={reportDraft(state, dossier, director)}
           onCancel={() => setEditing(false)}
@@ -481,7 +478,8 @@ function ReportBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolean 
             if (ok) setEditing(false);
           }}
         />
-      ) : report ? (
+      </Popup>
+      {report ? (
         <div>
           <PaperRow label="Immatriculation" value={report.plate} />
           <PaperRow label="Marque / modèle" value={report.makeModel} />
@@ -512,10 +510,7 @@ function ReportBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolean 
           </div>
         </div>
       ) : (
-        <div>
-          <p className="quiet">Le rapport se remplit quand les travaux sont faits.</p>
-          {canEdit ? <button className="btn-line mt-3" type="button" onClick={() => setEditing(true)}>Rédiger le rapport</button> : null}
-        </div>
+        <p className="quiet">Le rapport se remplit quand les travaux sont faits.</p>
       )}
       {canEdit && dossier.status !== "reparation_faite" ? (
         <div className="no-print mt-4">
@@ -527,7 +522,7 @@ function ReportBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolean 
           >
             Clôturer la réparation
           </button>
-          {!payable ? <p className="hint mt-2">Bloqué tant que les 70 % ne sont pas encaissés.</p> : null}
+          {!payable ? <p className="hint mt-2">Bloqué tant que la comptabilité n’a pas confirmé le règlement.</p> : null}
         </div>
       ) : null}
     </section>
@@ -544,16 +539,14 @@ function Meeting({ dossier }: { dossier: Dossier }) {
     <section className="glass no-print p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg">Voir le client</h2>
-        {role === "direction" ? <button className="btn" type="button" onClick={() => setOpen((value) => !value)}>Demander à voir le client</button> : null}
+        {role === "direction" ? <button className="btn" type="button" onClick={() => setOpen(true)}>Demander à voir le client</button> : null}
       </div>
-      <div className={`fold ${open ? "open" : ""}`}>
-        <div>
-          <textarea className="area mt-3" value={text} onChange={(event) => setText(event.target.value)} />
-          <button className="btn mt-3" type="button" onClick={() => run({ type: "requestClientMeeting", payload: { dossierId: dossier.id, text, actor: actorName } }, "Demande notée").then((ok) => { if (ok) setOpen(false); })}>
-            Noter la demande
-          </button>
-        </div>
-      </div>
+      <Popup open={open} title="Voir le client" onClose={() => setOpen(false)}>
+        <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} />
+        <button className="btn mt-3" type="button" onClick={() => run({ type: "requestClientMeeting", payload: { dossierId: dossier.id, text, actor: actorName } }, "Demande notée").then((ok) => { if (ok) setOpen(false); })}>
+          Noter la demande
+        </button>
+      </Popup>
       <div className="mt-3 grid gap-2">
         {dossier.notes.filter((note) => note.kind === "voir_client").map((note) => (
           <p key={note.id} className="text-sm"><strong>{note.author}</strong> · {formatWhen(note.at)} — {note.text}</p>
@@ -603,26 +596,32 @@ function PublishStatus({ dossier }: { dossier: Dossier }) {
 function DirectionComments({ dossier }: { dossier: Dossier }) {
   const { role, run, actorName } = useGarage();
   const [text, setText] = useState("");
-  const [pending, setPending] = useState(false);
+  const [open, setOpen] = useState(false);
   const comments = dossier.notes.filter((note) => note.kind === "commentaire");
   return (
     <section className="glass p-6">
-      <h2 className="text-lg">Commentaires de la direction</h2>
-      {role === "direction" ? (
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg">Commentaires de la direction</h2>
+        {role === "direction" ? <button className="btn-line" type="button" onClick={() => setOpen(true)}>Écrire</button> : null}
+      </div>
+      <Popup open={open} title="Commentaire" onClose={() => setOpen(false)}>
         <form
-          className="mt-3 grid gap-3"
+          className="grid gap-3"
           onSubmit={(event) => {
             event.preventDefault();
-            setPending(true);
             run({ type: "addComment", payload: { dossierId: dossier.id, text, actor: actorName } }, "Commentaire ajouté").then((ok) => {
-              if (ok) setText("");
-            }).finally(() => setPending(false));
+              if (ok) {
+                setText("");
+                setOpen(false);
+              }
+            });
           }}
         >
           <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} placeholder="Commentaire sur ce dossier" />
-          <button className="btn" type="submit" disabled={pending || !text.trim()}>Publier le commentaire</button>
+          <button className="btn" type="submit" disabled={!text.trim()}>Publier le commentaire</button>
         </form>
-      ) : (
+      </Popup>
+      {role === "direction" ? null : (
         <p className="quiet mt-1 text-sm">Lisibles par l’équipe. Seule la direction les écrit.</p>
       )}
       <div className="mt-4 grid gap-2">

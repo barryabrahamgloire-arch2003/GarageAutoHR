@@ -484,6 +484,54 @@
     transition-duration: 0.01ms !important;
   }
 }
+.app-frame { transition: grid-template-columns .35s cubic-bezier(.16, 1, .3, 1); }
+.app-frame.is-rail { grid-template-columns: 92px minmax(0, 1fr); }
+.app-frame.is-rail .side-copy { display: none; }
+.app-frame.is-rail .side-top { flex-direction: column; align-items: center; }
+.app-frame.is-rail .side-link { justify-content: center; padding-inline: 0; }
+.app-frame.is-rail .side-user { padding: .45rem; }
+.side-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .35rem; }
+.side-fold, .icon-btn, .tab-handle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  color: #f7f1ea;
+  background: #1e242e;
+}
+.icon-btn { background: #14181f; }
+.side-link { gap: .7rem; }
+.side-user .btn-line { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
+.motion-icon { display: grid; width: 22px; height: 22px; place-items: center; }
+.gear { width: 22px; height: 22px; }
+.gear.is-on { animation: gear-turn .7s linear infinite; }
+@keyframes gear-turn { to { transform: rotate(360deg); } }
+.busy-inline { display: inline-flex; align-items: center; gap: .55rem; color: #6a625a; }
+.busy-flag {
+  position: fixed;
+  z-index: 70;
+  right: 1rem;
+  bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .7rem .95rem;
+  border-radius: 999px;
+  background: #14181f;
+  color: #f7f1ea;
+  box-shadow: 0 16px 36px -18px rgba(20, 24, 31, .7);
+}
+.pop-in { margin-top: .75rem; animation: rise .35s cubic-bezier(.16, 1, .3, 1) both; }
+.popup-card { width: min(720px, calc(100vw - 2rem)) !important; max-width: 720px !important; background: #fffaf7; }
+.tabbar { flex-direction: column; transition: transform .35s cubic-bezier(.16, 1, .3, 1); }
+.tab-links { display: flex; justify-content: space-around; }
+.tabbar.is-away { transform: translateY(calc(100% - 48px)); }
+@media (max-width: 860px) {
+  .app-frame.is-rail { grid-template-columns: 1fr; }
+  .busy-flag { bottom: 5.6rem; }
+}
+
 @media print {
   .no-print, .liquid, .sidebar, .tabbar { display: none !important; }
   body { background: white; }

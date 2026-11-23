@@ -20,5 +20,14 @@ describe("espaces du SaaS", () => {
     assert.equal(view.purchases.length, 0);
     assert.ok(view.dossiers.every((dossier) => dossier.clientId === "c_transkipe" && dossier.invoice === null));
     assert.ok(view.dossiers.some((dossier) => dossier.clientStatus === null));
+    const atelier = platform.accounts.find((account) => account.role === "atelier");
+    assert.ok(atelier);
+    const workshop = visibleState(platform.garages[0].state, atelier);
+    assert.ok(workshop.dossiers.every((dossier) => dossier.invoice === null && dossier.labor === 0));
+    assert.ok(workshop.dossiers.every((dossier) => dossier.parts.every((part) => part.unitPrice === 0)));
+    const compta = platform.accounts.find((account) => account.role === "comptabilite");
+    assert.ok(compta);
+    const books = visibleState(platform.garages[0].state, compta);
+    assert.ok(books.dossiers.some((dossier) => dossier.invoice));
   });
 });

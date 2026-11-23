@@ -4,7 +4,8 @@ import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useGarage } from "@/components/garage-provider";
-import { Empty } from "@/components/kit";
+import { Empty, WhatsAppList } from "@/components/kit";
+import { Popup } from "@/components/popup";
 import { gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { clientDossiers, nextAction, sortDossiers, titleOf } from "@/lib/selectors";
 import { roleLabel } from "@/lib/talk";
@@ -131,10 +132,19 @@ function CarCard({ dossier }: { dossier: Dossier }) {
       <p className="mt-auto text-sm text-[#16181c]">
         {role === "client"
           ? (dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut.")
-          : nextAction(dossier)}
+          : role === "atelier"
+            ? atelierHint(dossier)
+            : nextAction(dossier)}
       </p>
     </Link>
   );
+}
+
+function atelierHint(dossier: Dossier) {
+  if (dossier.status === "recu") return "À diagnostiquer";
+  if (dossier.status === "paiement_effectue") return "Réparation à lancer";
+  if (dossier.status === "reparation_faite") return "Travaux terminés";
+  return "En attente du règlement";
 }
 
 function ClientDesk() {
@@ -222,6 +232,46 @@ function PurchaseDecision({
   );
 }
 
+function BuyNote({
+  raw,
+  note,
+  over,
+  ready,
+  onPrice,
+  onNote,
+  onBuy,
+}: {
+  purchaseId: string;
+  raw: string;
+  note: string;
+  over: boolean;
+  ready: boolean;
+  onPrice: (value: string) => void;
+  onNote: (value: string) => void;
+  onBuy: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button className="btn w-fit" type="button" onClick={() => setOpen(true)}>Noter l’achat</button>
+      <Popup open={open} title="Noter l’achat" onClose={() => setOpen(false)}>
+        <div className="grid gap-3">
+          <label className="grid gap-1.5">
+            <span className="label">Prix obtenu</span>
+            <input className="field" inputMode="numeric" value={raw} onChange={(event) => onPrice(event.target.value)} />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="label">Où, ou note</span>
+            <input className="field" value={note} onChange={(event) => onNote(event.target.value)} />
+          </label>
+          {over ? <p className="text-sm text-[#8d3a32]">Ce prix dépasse le maximum validé. La direction le verra.</p> : null}
+          <button className="btn" type="button" disabled={!ready} onClick={() => { onBuy(); setOpen(false); }}>J’ai acheté</button>
+        </div>
+      </Popup>
+    </>
+  );
+}
+
 function Purchases() {
   const { state, run, actorName } = useGarage();
   const [prices, setPrices] = useState<Record<string, string>>({});
@@ -244,10 +294,14 @@ function Purchases() {
           { label: "En attente de validation", value: state.purchases.filter((item) => item.status === "a_valider").length },
         ]}
         action={
-          <div className="flex gap-2">
-            {compta ? <a className="btn-wa" href={`https://wa.me/${compta.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Bonjour, au sujet des achats du garage.")}`}>Compta</a> : null}
-            {direction ? <a className="btn-line" href={`https://wa.me/${direction.phone.replace(/\D/g, "")}?text=${encodeURIComponent("Bonjour, au sujet d’un prix d’achat.")}`}>Direction</a> : null}
-          </div>
+          <WhatsAppList
+            talks={[compta, direction].filter((person) => person?.phone).map((person) => ({
+              name: person!.name,
+              phone: person!.phone,
+              role: person!.post,
+              text: "Bonjour, au sujet des achats du garage.",
+            }))}
+          />
         }
       />
       <div className="grid gap-3">
@@ -268,30 +322,22 @@ function Purchases() {
                   <p className="quiet text-sm">Avant le {purchase.deadline}</p>
                 </div>
               </div>
-              <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                <label className="grid gap-1.5">
-                  <span className="label">Prix obtenu</span>
-                  <input className="field" inputMode="numeric" value={raw} onChange={(event) => setPrices((current) => ({ ...current, [purchase.id]: event.target.value }))} />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="label">Où, ou note</span>
-                  <input className="field" value={notes[purchase.id] ?? ""} onChange={(event) => setNotes((current) => ({ ...current, [purchase.id]: event.target.value }))} />
-                </label>
-                <button
-                  className="btn self-end"
-                  type="button"
-                  onClick={() => {
-                    if (amount === null) return;
-                    run(
-                      { type: "buyPurchase", payload: { purchaseId: purchase.id, price: amount, note: notes[purchase.id] ?? "", actor: actorName } },
-                      "Achat enregistré",
-                    );
-                  }}
-                >
-                  J’ai acheté
-                </button>
-              </div>
-              {over ? <p className="text-sm text-[#8d3a32]">Ce prix dépasse le maximum validé. La direction le verra.</p> : null}
+              <BuyNote
+                purchaseId={purchase.id}
+                raw={raw}
+                note={notes[purchase.id] ?? ""}
+                over={over}
+                ready={amount !== null}
+                onPrice={(value) => setPrices((current) => ({ ...current, [purchase.id]: value }))}
+                onNote={(value) => setNotes((current) => ({ ...current, [purchase.id]: value }))}
+                onBuy={() => {
+                  if (amount === null) return;
+                  run(
+                    { type: "buyPurchase", payload: { purchaseId: purchase.id, price: amount, note: notes[purchase.id] ?? "", actor: actorName } },
+                    "Achat enregistré",
+                  );
+                }}
+              />
             </article>
           );
         }) : <p className="quiet">Aucun achat en attente. Quand la direction valide une demande, elle apparaît ici.</p>}

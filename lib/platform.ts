@@ -36,11 +36,20 @@ export interface OnlineRequest {
   seenAt: string | null;
 }
 
+export interface ClientReview {
+  id: string;
+  name: string;
+  scores: number[];
+  comment: string;
+  createdAt: string;
+}
+
 export interface Platform {
   version: 4;
   garages: GarageWorkspace[];
   accounts: Account[];
   onlineRequests: OnlineRequest[];
+  reviews: ClientReview[];
 }
 
 export interface PublicAccount {
@@ -121,6 +130,7 @@ export function createPlatform(): Platform {
     garages: [{ id: GARAGE_ID, name: state.settings.name, slug: "auto-hr", state }],
     accounts: demoAccounts(GARAGE_ID),
     onlineRequests: [],
+    reviews: [],
   };
 }
 
@@ -156,8 +166,24 @@ export function slugify(value: string) {
   return slug || "garage";
 }
 
+function hideBilling(state: State): State {
+  return {
+    ...state,
+    settings: { ...state.settings, laborRate: 0 },
+    products: state.products.map((product) => ({ ...product, price: 0 })),
+    dossiers: state.dossiers.map((dossier) => ({
+      ...dossier,
+      labor: 0,
+      depositPaid: 0,
+      invoice: null,
+      parts: dossier.parts.map((part) => ({ ...part, unitPrice: 0 })),
+    })),
+  };
+}
+
 export function visibleState(state: State, account: Account): State {
-  if (account.role !== "client" || !account.clientId) return state;
+  if (account.role === "comptabilite" || account.role === "direction") return state;
+  if (account.role !== "client" || !account.clientId) return hideBilling(state);
   const clientId = account.clientId;
   return {
     ...state,

@@ -7,6 +7,7 @@ import {
   normalizeState,
   type Account,
   type GarageWorkspace,
+  type ClientReview,
   type OnlineRequest,
   type Platform,
 } from "./platform";
@@ -41,11 +42,12 @@ function isPlatform(value: unknown): value is Platform {
 
 export function normalizePlatform(value: unknown): Platform {
   if (isPlatform(value)) {
-    const stored = value as Platform & { onlineRequests?: OnlineRequest[] };
+    const stored = value as Platform & { onlineRequests?: OnlineRequest[]; reviews?: ClientReview[] };
     return {
       version: 4,
       accounts: value.accounts,
       onlineRequests: Array.isArray(stored.onlineRequests) ? stored.onlineRequests : [],
+      reviews: Array.isArray(stored.reviews) ? stored.reviews : [],
       garages: value.garages.map((garage) => ({
         ...garage,
         state: normalizeState(garage.state),

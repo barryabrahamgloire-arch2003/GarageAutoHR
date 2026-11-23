@@ -22,6 +22,7 @@ interface GarageContextValue {
   state: State | null;
   profile: Profile | null;
   loading: boolean;
+  busy: boolean;
   error: string | null;
   role: Role;
   clientId: string;
@@ -48,7 +49,16 @@ export function GarageProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const track = useCallback(async <T,>(job: Promise<T>) => {
+    setPending((count) => count + 1);
+    try {
+      return await job;
+    } finally {
+      setPending((count) => Math.max(0, count - 1));
+    }
+  }, []);
 
   const refresh = useCallback(async () => {
     const response = await fetch("/api/state", { cache: "no-store" });
@@ -99,7 +109,7 @@ export function GarageProvider({ children }: { children: ReactNode }) {
   }, [refresh, router]);
 
   const dispatch = useCallback(
-    async (action: Action) => {
+    async (action: Action) => track((async () => {
       const response = await fetch("/api/action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,8 +121,8 @@ export function GarageProvider({ children }: { children: ReactNode }) {
       }
       setState(data);
       return data;
-    },
-    [],
+    })()),
+    [track],
   );
 
   const run = useCallback(
@@ -153,6 +163,7 @@ export function GarageProvider({ children }: { children: ReactNode }) {
         state,
         profile,
         loading,
+        busy: pending > 0,
         error,
         role,
         clientId: profile?.clientId ?? "",

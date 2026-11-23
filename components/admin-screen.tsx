@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Popup } from "@/components/popup";
 import { DEMO_PASSWORD, spaceLabel, type SpaceRole } from "@/lib/accounts";
 import { ROLES } from "@/lib/types";
 
@@ -41,6 +42,8 @@ export function AdminScreen() {
   const [notice, setNotice] = useState("");
   const [garageForm, setGarageForm] = useState(EMPTY_GARAGE);
   const [memberForm, setMemberForm] = useState(EMPTY_MEMBER);
+  const [garageOpen, setGarageOpen] = useState(false);
+  const [memberOpen, setMemberOpen] = useState(false);
   const [pending, setPending] = useState("");
 
   useEffect(() => {
@@ -144,16 +147,23 @@ export function AdminScreen() {
 
         <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
           <section className="glass grid gap-4 p-6">
-            <h2 className="text-lg">Nouveau garage</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg">Garages</h2>
+              <button className="btn" type="button" onClick={() => setGarageOpen(true)}>Nouveau garage</button>
+            </div>
+            <Popup open={garageOpen} title="Nouveau garage" onClose={() => setGarageOpen(false)}>
+              <div className="grid gap-3">
             <Field label="Nom" value={garageForm.name} onChange={(name) => setGarageForm({ ...garageForm, name })} />
             <Field label="Ville" value={garageForm.city} onChange={(city) => setGarageForm({ ...garageForm, city })} />
             <Field label="Téléphone" value={garageForm.phone} onChange={(phone) => setGarageForm({ ...garageForm, phone })} />
             <Field label="Directeur" value={garageForm.directorName} onChange={(directorName) => setGarageForm({ ...garageForm, directorName })} />
             <Field label="E-mail du directeur" value={garageForm.directorEmail} onChange={(directorEmail) => setGarageForm({ ...garageForm, directorEmail })} />
             <Field label="Mot de passe" value={garageForm.directorPassword} onChange={(directorPassword) => setGarageForm({ ...garageForm, directorPassword })} type="password" />
-            <button className="btn" type="button" disabled={pending === "garage"} onClick={() => send({ type: "createGarage", ...garageForm }, "garage").then(() => setGarageForm(EMPTY_GARAGE))}>
+            <button className="btn" type="button" disabled={pending === "garage"} onClick={() => send({ type: "createGarage", ...garageForm }, "garage").then(() => { setGarageForm(EMPTY_GARAGE); setGarageOpen(false); })}>
               Créer le garage
             </button>
+              </div>
+            </Popup>
             <div className="grid gap-2">
               {directory.garages.map((garage) => (
                 <article key={garage.id} className="rounded-2xl bg-white/50 p-4">
@@ -191,7 +201,9 @@ export function AdminScreen() {
                 );
               })}
             </div>
-            <h3 className="text-base">Inviter</h3>
+            <button className="btn w-fit" type="button" onClick={() => setMemberOpen(true)}>Inviter</button>
+            <Popup open={memberOpen} title="Inviter un membre" onClose={() => setMemberOpen(false)}>
+              <div className="grid gap-3">
             <Field label="Nom" value={memberForm.name} onChange={(name) => setMemberForm({ ...memberForm, name })} />
             <Field label="E-mail" value={memberForm.email} onChange={(email) => setMemberForm({ ...memberForm, email })} />
             <label className="grid gap-1">
@@ -220,9 +232,11 @@ export function AdminScreen() {
               </label>
             ) : null}
             <Field label="Mot de passe" value={memberForm.password} onChange={(password) => setMemberForm({ ...memberForm, password })} type="password" />
-            <button className="btn" type="button" disabled={pending === "member"} onClick={() => send({ type: "createAccount", ...memberForm }, "member").then(() => setMemberForm(EMPTY_MEMBER))}>
+            <button className="btn" type="button" disabled={pending === "member"} onClick={() => send({ type: "createAccount", ...memberForm }, "member").then(() => { setMemberForm(EMPTY_MEMBER); setMemberOpen(false); })}>
               Créer le compte
             </button>
+              </div>
+            </Popup>
           </section>
         </div>
       </div>

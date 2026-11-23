@@ -8,7 +8,10 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/_next") || pathname === "/logo.png" || pathname === "/favicon.ico") {
     return NextResponse.next();
   }
-  if (pathname === "/api/demandes" && (request.method === "POST" || request.method === "OPTIONS")) {
+  if (
+    (pathname === "/api/demandes" || pathname === "/api/avis" || pathname === "/api/avis/voir") &&
+    (request.method === "POST" || request.method === "OPTIONS")
+  ) {
     return NextResponse.next();
   }
   const session = verifySession(request.cookies.get(SESSION_COOKIE)?.value);

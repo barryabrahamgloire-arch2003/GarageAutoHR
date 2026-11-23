@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Votre avis — Garage Auto HR Conakry</title>
+  <link rel="icon" href="/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#0D141C; --red:#A03B2E; --cream:#F1E8D5; --card:#FBFAF8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100dvh; background: var(--ink); color: var(--cream); font-family: Archivo, system-ui, sans-serif; }
+    main { width: min(720px, calc(100% - 32px)); margin: 48px auto 72px; }
+    .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+    .brand img { width: 72px; height: 72px; object-fit: contain; }
+    h1 { font-family: Anton, Impact, sans-serif; font-weight: 400; letter-spacing: .02em; text-transform: uppercase; font-size: clamp(2rem, 6vw, 3.2rem); line-height: .95; margin: 0 0 12px; }
+    p.lead { color: rgba(241,232,213,.72); margin: 0 0 22px; }
+    form, .done { background: var(--card); color: var(--ink); border-radius: 22px; padding: 22px; }
+    label { display: grid; gap: 8px; margin: 16px 0; font-weight: 600; }
+    input[type=text], textarea { width: 100%; border: 1px solid #e4ddd4; border-radius: 12px; padding: 12px 14px; font: inherit; }
+    textarea { min-height: 120px; resize: vertical; }
+    .rank { display: flex; gap: 8px; }
+    .rank button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid #e4ddd4; background: white; font: inherit; font-weight: 700; cursor: pointer; }
+    .rank button.on { background: var(--red); color: white; border-color: var(--red); }
+    .send { margin-top: 8px; border: 0; border-radius: 999px; background: var(--red); color: white; font: inherit; font-weight: 700; padding: 14px 22px; cursor: pointer; }
+    .send:disabled { opacity: .6; }
+    .note { min-height: 1.2em; color: var(--red); font-size: .92rem; }
+    .hp { position: absolute; left: -9999px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand"><img src="/logo.png" alt="Garage Auto HR Conakry"></div>
+    <h1>Votre avis</h1>
+    <p class="lead">Cinq questions après votre passage au garage. Quatre notes, puis votre témoignage.</p>
+    <form id="avis">
+      <label>Votre nom<input name="name" required minlength="2" autocomplete="name"></label>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off">
+      <div id="questions"></div>
+      <label>Votre témoignage<textarea name="comment" required minlength="4" placeholder="Ce que vous avez pensé du passage au garage"></textarea></label>
+      <p class="note" id="note"></p>
+      <button class="send" type="submit">Envoyer l’avis</button>
+    </form>
+  </main>
+  <script>
+    const QUESTIONS = [
+      "L’accueil et l’écoute",
+      "La qualité du diagnostic et de la réparation",
+      "Le respect des délais annoncés",
+      "La clarté du devis et la confiance"
+    ];
+    const scores = [0, 0, 0, 0];
+    const box = document.getElementById("questions");
+    QUESTIONS.forEach((question, index) => {
+      const label = document.createElement("label");
+      label.textContent = question;
+      const rank = document.createElement("div");
+      rank.className = "rank";
+      for (let value = 1; value <= 5; value++) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = String(value);
+        button.addEventListener("click", () => {
+          scores[index] = value;
+          rank.querySelectorAll("button").forEach((item, itemIndex) => item.classList.toggle("on", itemIndex < value));
+        });
+        rank.appendChild(button);
+      }
+      label.appendChild(rank);
+      box.appendChild(label);
+    });
+    document.getElementById("avis").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const note = document.getElementById("note");
+      if (scores.some((score) => score < 1)) {
+        note.textContent = "Notez chaque question de 1 à 5.";
+        return;
+      }
+      const button = form.querySelector("button");
+      button.disabled = true;
+      note.textContent = "";
+      try {
+        const response = await fetch("https://garage-auto-hr.vercel.app/api/avis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.value,
+            scores,
+            comment: form.comment.value,
+            website: form.website.value
+          })
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || "Envoi impossible.");
+        form.outerHTML = "<section class='done'><h2>Merci.</h2><p>Votre avis est enregistré.</p></section>";
+      } catch (error) {
+        note.textContent = error.message || "Envoi impossible.";
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
