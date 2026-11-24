@@ -3,7 +3,13 @@
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import plus from "@iconify-icons/line-md/plus";
+import clipboard from "@iconify-icons/line-md/clipboard-list";
+import checkAll from "@iconify-icons/line-md/check-all";
+import closeIcon from "@iconify-icons/line-md/close";
+import pencil from "@iconify-icons/line-md/pencil";
 import { useGarage } from "@/components/garage-provider";
+import { MotionIcon } from "@/components/motion-icon";
 import { Empty, WhatsAppList } from "@/components/kit";
 import { Popup } from "@/components/popup";
 import { gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
@@ -31,7 +37,7 @@ export function Desk() {
               ? "Diagnostiquez, puis réparez seulement après l’acompte de 70 %."
               : "Les pannes arrivent de l’atelier. Préparez la facture et les achats."
         }
-        action={role === "reception" ? <Link className="btn" href="/nouveau">Nouvel ordre</Link> : role === "comptabilite" ? <Link className="btn" href="/grille">Grille et stock</Link> : null}
+        action={role === "reception" ? <Link className="btn" href="/nouveau"><MotionIcon icon={plus} /><span>Nouvel ordre</span></Link> : role === "comptabilite" ? <Link className="btn" href="/grille"><MotionIcon icon={clipboard} /><span>Grille et stock</span></Link> : null}
         stats={
           role === "reception"
             ? [
@@ -93,27 +99,22 @@ function groupsFor(role: "reception" | "atelier" | "comptabilite", dossiers: Dos
 
 function Header({ kicker, title, text, action, stats }: { kicker: string; title: string; text: string; action?: ReactNode; stats?: { label: string; value: number }[] }) {
   return (
-    <div className="grid gap-4">
-      <header className="home-hero">
-        <Image src="/logo.png" alt="Garage Auto HR" width={88} height={88} className="home-logo" />
-        <div>
-          <p className="kicker">{kicker}</p>
-          <h1 className="mt-1">{title}</h1>
-          <p className="quiet mt-2 max-w-xl">{text}</p>
-        </div>
-        {action ? <div className="home-action">{action}</div> : null}
-      </header>
-      {stats?.length ? (
-        <div className="stat-grid">
-          {stats.map((stat) => (
-            <article key={stat.label} className="stat">
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-            </article>
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <header className="home-hero">
+      <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo" />
+      <div>
+        <p className="kicker">{kicker}</p>
+        <h1 className="mt-1">{title}</h1>
+        <p className="quiet mt-2 max-w-xl">{text}</p>
+        {stats?.length ? (
+          <p className="kpi-row">
+            {stats.map((stat) => (
+              <span key={stat.label}><strong>{stat.value}</strong>{stat.label}</span>
+            ))}
+          </p>
+        ) : null}
+      </div>
+      {action ? <div className="home-action">{action}</div> : null}
+    </header>
   );
 }
 
@@ -222,10 +223,10 @@ function PurchaseDecision({
       </div>
       <div className="flex gap-2">
         <button className="btn" type="button" onClick={() => run({ type: "validatePurchase", payload: { purchaseId: purchase.id, actor } }, "Achat validé")}>
-          Valider
+          <MotionIcon icon={checkAll} /><span>Valider</span>
         </button>
         <button className="btn-line" type="button" onClick={() => run({ type: "refusePurchase", payload: { purchaseId: purchase.id, actor } }, "Achat refusé")}>
-          Refuser
+          <MotionIcon icon={closeIcon} /><span>Refuser</span>
         </button>
       </div>
     </article>
@@ -253,7 +254,7 @@ function BuyNote({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn w-fit" type="button" onClick={() => setOpen(true)}>Noter l’achat</button>
+      <button className="btn w-fit" type="button" onClick={() => setOpen(true)}><MotionIcon icon={pencil} /><span>Noter l’achat</span></button>
       <Popup open={open} title="Noter l’achat" onClose={() => setOpen(false)}>
         <div className="grid gap-3">
           <label className="grid gap-1.5">
@@ -265,7 +266,7 @@ function BuyNote({
             <input className="field" value={note} onChange={(event) => onNote(event.target.value)} />
           </label>
           {over ? <p className="text-sm text-[#8d3a32]">Ce prix dépasse le maximum validé. La direction le verra.</p> : null}
-          <button className="btn" type="button" disabled={!ready} onClick={() => { onBuy(); setOpen(false); }}>J’ai acheté</button>
+          <button className="btn" type="button" disabled={!ready} onClick={() => { onBuy(); setOpen(false); }}><MotionIcon icon={checkAll} /><span>J’ai acheté</span></button>
         </div>
       </Popup>
     </>

@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import logoutIcon from "@iconify-icons/line-md/logout";
+import plus from "@iconify-icons/line-md/plus";
+import accountAdd from "@iconify-icons/line-md/account-add";
+import backup from "@iconify-icons/line-md/backup-restore";
+import login from "@iconify-icons/line-md/login";
+import checkAll from "@iconify-icons/line-md/check-all";
+import { MotionIcon } from "@/components/motion-icon";
 import { Popup } from "@/components/popup";
 import { DEMO_PASSWORD, spaceLabel, type SpaceRole } from "@/lib/accounts";
 import { ROLES } from "@/lib/types";
@@ -127,7 +134,8 @@ export function AdminScreen() {
           <small className="text-[#b7aea4]">Superadmin</small>
         </div>
         <button className="btn-line" type="button" onClick={() => fetch("/api/logout", { method: "POST" }).then(() => router.push("/connexion"))}>
-          Sortir
+          <MotionIcon icon={logoutIcon} />
+          <span>Sortir</span>
         </button>
       </header>
       <div className="admin-body">
@@ -136,11 +144,11 @@ export function AdminScreen() {
           <p className="quiet mt-1">Les garages, leurs membres, et l’interface de chacun.</p>
         </header>
 
-        <section className="metric-grid">
-          <Metric label="Garages" value={String(directory.garages.length)} />
-          <Metric label="Membres" value={String(directory.accounts.length)} />
-          <Metric label="Dossiers" value={String(directory.garages.reduce((sum, garage) => sum + garage.dossiers, 0))} />
-        </section>
+        <p className="kpi-row">
+          <span><strong>{directory.garages.length}</strong>Garages</span>
+          <span><strong>{directory.accounts.length}</strong>Membres</span>
+          <span><strong>{directory.garages.reduce((sum, garage) => sum + garage.dossiers, 0)}</strong>Dossiers</span>
+        </p>
 
         {error ? <p className="text-sm text-[#8d3a32]">{error}</p> : null}
         {notice ? <p className="text-sm">{notice}</p> : null}
@@ -149,7 +157,7 @@ export function AdminScreen() {
           <section className="glass grid gap-4 p-6">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg">Garages</h2>
-              <button className="btn" type="button" onClick={() => setGarageOpen(true)}>Nouveau garage</button>
+              <button className="btn" type="button" onClick={() => setGarageOpen(true)}><MotionIcon icon={plus} /><span>Nouveau garage</span></button>
             </div>
             <Popup open={garageOpen} title="Nouveau garage" onClose={() => setGarageOpen(false)}>
               <div className="grid gap-3">
@@ -160,7 +168,7 @@ export function AdminScreen() {
             <Field label="E-mail du directeur" value={garageForm.directorEmail} onChange={(directorEmail) => setGarageForm({ ...garageForm, directorEmail })} />
             <Field label="Mot de passe" value={garageForm.directorPassword} onChange={(directorPassword) => setGarageForm({ ...garageForm, directorPassword })} type="password" />
             <button className="btn" type="button" disabled={pending === "garage"} onClick={() => send({ type: "createGarage", ...garageForm }, "garage").then(() => { setGarageForm(EMPTY_GARAGE); setGarageOpen(false); })}>
-              Créer le garage
+              <MotionIcon icon={checkAll} /><span>Créer le garage</span>
             </button>
               </div>
             </Popup>
@@ -178,7 +186,7 @@ export function AdminScreen() {
             <div className="flex items-end justify-between gap-3">
               <h2 className="text-lg">Membres</h2>
               <button className="btn-ghost" type="button" disabled={pending === "reset"} onClick={() => send({ type: "resetDemo" }, "reset")}>
-                Restaurer l’exemple
+                <MotionIcon icon={backup} /><span>Restaurer l’exemple</span>
               </button>
             </div>
             <p className="hint">Mot de passe des comptes livrés : {DEMO_PASSWORD}</p>
@@ -194,14 +202,14 @@ export function AdminScreen() {
                     </div>
                     {account.role === "superadmin" ? null : (
                       <button className="btn" type="button" disabled={pending === account.id} onClick={() => impersonate(account.id)}>
-                        Ouvrir l’interface
+                        <MotionIcon icon={login} /><span>Ouvrir</span>
                       </button>
                     )}
                   </article>
                 );
               })}
             </div>
-            <button className="btn w-fit" type="button" onClick={() => setMemberOpen(true)}>Inviter</button>
+            <button className="btn w-fit" type="button" onClick={() => setMemberOpen(true)}><MotionIcon icon={accountAdd} /><span>Inviter</span></button>
             <Popup open={memberOpen} title="Inviter un membre" onClose={() => setMemberOpen(false)}>
               <div className="grid gap-3">
             <Field label="Nom" value={memberForm.name} onChange={(name) => setMemberForm({ ...memberForm, name })} />
@@ -233,7 +241,7 @@ export function AdminScreen() {
             ) : null}
             <Field label="Mot de passe" value={memberForm.password} onChange={(password) => setMemberForm({ ...memberForm, password })} type="password" />
             <button className="btn" type="button" disabled={pending === "member"} onClick={() => send({ type: "createAccount", ...memberForm }, "member").then(() => { setMemberForm(EMPTY_MEMBER); setMemberOpen(false); })}>
-              Créer le compte
+              <MotionIcon icon={checkAll} /><span>Créer le compte</span>
             </button>
               </div>
             </Popup>
@@ -241,15 +249,6 @@ export function AdminScreen() {
         </div>
       </div>
     </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="glass p-5">
-      <p className="kicker">{label}</p>
-      <p className="mt-2 text-3xl">{value}</p>
-    </article>
   );
 }
 

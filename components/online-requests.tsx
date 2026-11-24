@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import phone from "@iconify-icons/line-md/phone";
+import chat from "@iconify-icons/line-md/chat";
+import checkAll from "@iconify-icons/line-md/check-all";
 import { useGarage } from "@/components/garage-provider";
+import { MotionIcon } from "@/components/motion-icon";
 import { whatsappHref } from "@/lib/format";
 import type { OnlineRequest } from "@/lib/online-requests";
 
@@ -34,18 +38,18 @@ export function OnlineRequests() {
     <div className="rise grid gap-8">
       <div className="grid gap-4">
         <header className="home-hero">
-          <Image src="/logo.png" alt="Garage Auto HR" width={88} height={88} className="home-logo" />
+          <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo" />
           <div>
             <p className="kicker">Réception</p>
             <h1 className="mt-1">Demandes en ligne</h1>
             <p className="quiet mt-2 max-w-xl">Les formulaires du site arrivent ici, et un mail part vers contact@garageautohrco.com.</p>
+            <p className="kpi-row">
+              <span><strong>{fresh}</strong>Nouvelles</span>
+              <span><strong>{list.length}</strong>Au total</span>
+              <span><strong>{list.filter((item) => item.kind === "client").length}</strong>Clients</span>
+            </p>
           </div>
         </header>
-        <div className="stat-grid">
-          <article className="stat"><strong>{fresh}</strong><span>Nouvelles</span></article>
-          <article className="stat"><strong>{list.length}</strong><span>Au total</span></article>
-          <article className="stat"><strong>{list.filter((item) => item.kind === "client").length}</strong><span>Clients</span></article>
-        </div>
       </div>
       {error ? <p className="quiet">{error}</p> : null}
       {!rows ? <p className="quiet">Chargement des demandes…</p> : null}
@@ -64,8 +68,8 @@ export function OnlineRequests() {
             {item.category ? <p>Catégorie : {item.category}</p> : null}
             <p>{item.phone}{item.email ? ` · ${item.email}` : ""}</p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <a className="btn" href={`tel:${item.phone.replace(/\s/g, "")}`}>Appeler</a>
-              <a className="btn-line" href={whatsappHref(item.phone, `Bonjour ${item.name}, Garage Auto HR Conakry. Nous avons bien reçu votre demande : ${item.subject}.`)} target="_blank" rel="noreferrer">WhatsApp</a>
+              <a className="btn" href={`tel:${item.phone.replace(/\s/g, "")}`}><MotionIcon icon={phone} /><span>Appeler</span></a>
+              <a className="btn-line" href={whatsappHref(item.phone, `Bonjour ${item.name}, Garage Auto HR Conakry. Nous avons bien reçu votre demande : ${item.subject}.`)} target="_blank" rel="noreferrer"><MotionIcon icon={chat} /><span>WhatsApp</span></a>
               {item.seenAt ? null : (
                 <button
                   className="btn-line"
@@ -80,7 +84,7 @@ export function OnlineRequests() {
                       .catch(() => setError("La demande n’a pas pu être marquée comme lue."));
                   }}
                 >
-                  Marquer comme lue
+                  <MotionIcon icon={checkAll} /><span>Marquer comme lue</span>
                 </button>
               )}
             </div>

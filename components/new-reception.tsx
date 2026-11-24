@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import arrowLeft from "@iconify-icons/line-md/arrow-left";
+import plus from "@iconify-icons/line-md/plus";
 import { useGarage } from "@/components/garage-provider";
+import { MotionIcon } from "@/components/motion-icon";
 import { ReceptionEditor } from "@/components/forms";
 import { Empty } from "@/components/kit";
 import { Popup } from "@/components/popup";
@@ -14,7 +17,7 @@ export function NewReception() {
   const { role, actorName, dispatch } = useGarage();
   const [open, setOpen] = useState(true);
   if (role !== "reception" && role !== "atelier") {
-    return <Empty title="Réception" text="L’ordre de réception se remplit à l’accueil ou par un garagiste." action={<button className="btn" type="button" onClick={() => router.push("/")}>Retour</button>} />;
+    return <Empty title="Réception" text="L’ordre de réception se remplit à l’accueil ou par un garagiste." action={<button className="btn" type="button" onClick={() => router.push("/")}><MotionIcon icon={arrowLeft} /><span>Retour</span></button>} />;
   }
 
   return (
@@ -24,7 +27,7 @@ export function NewReception() {
         <h1 className="display mt-2 text-[2.4rem]">Nouvelle arrivée</h1>
         <p className="quiet mt-3">La réceptionniste ou un garagiste remplit cette fiche. Le diagnostic d’atelier se complète ensuite.</p>
       </header>
-      <button className="btn w-fit" type="button" onClick={() => setOpen(true)}>Remplir l’ordre</button>
+      <button className="btn w-fit" type="button" onClick={() => setOpen(true)}><MotionIcon icon={plus} /><span>Remplir l’ordre</span></button>
       <Popup open={open} title="Ordre de réception" onClose={() => setOpen(false)}>
         <ReceptionEditor
           initial={emptyReception(actorName)}

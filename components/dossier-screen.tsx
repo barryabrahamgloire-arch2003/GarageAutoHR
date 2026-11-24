@@ -4,8 +4,18 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useGarage } from "@/components/garage-provider";
 import { ReceptionEditor, ReportEditor, WorkshopEditor } from "@/components/forms";
-import { Empty, PaperRow, SignatureView, StatusRail, WhatsAppList } from "@/components/kit";
+import { Empty, PaperRow, Section, SignatureView, StatusRail, WhatsAppList } from "@/components/kit";
+import { MotionIcon } from "@/components/motion-icon";
 import { Popup } from "@/components/popup";
+import pencil from "@iconify-icons/line-md/pencil";
+import plus from "@iconify-icons/line-md/plus";
+import checkAll from "@iconify-icons/line-md/check-all";
+import closeIcon from "@iconify-icons/line-md/close";
+import trash from "@iconify-icons/line-md/trash";
+import backup from "@iconify-icons/line-md/backup-restore";
+import account from "@iconify-icons/line-md/account";
+import download from "@iconify-icons/line-md/download";
+import arrowLeft from "@iconify-icons/line-md/arrow-left";
 import { emptyWorkshop, liveInvoice, moneyOf, reportDraft } from "@/lib/domain";
 import { formatDay, formatWhen, gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { byPost, clientOf } from "@/lib/selectors";
@@ -19,7 +29,7 @@ export function DossierScreen({ id }: { id: string }) {
   const dossier = state.dossiers.find((item) => item.id === id);
   if (!dossier) return <Empty title="Introuvable" text="Ce dossier n’est plus dans le garage." />;
   if (role === "achats") {
-    return <Empty title="Liste d’achats" text="Les achats ne montrent pas les dossiers, seulement la liste à acheter." action={<Link className="btn" href="/">Voir la liste</Link>} />;
+    return <Empty title="Liste d’achats" text="Les achats ne montrent pas les dossiers, seulement la liste à acheter." action={<Link className="btn" href="/"><MotionIcon icon={arrowLeft} /><span>Voir la liste</span></Link>} />;
   }
   const client = clientOf(state, dossier);
   if (role === "client" && dossier.clientId !== clientId) {
@@ -129,13 +139,7 @@ function Sheet({
   const { run, actorName } = useGarage();
   const [editing, setEditing] = useState(false);
   return (
-    <section className="glass p-6">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h2 className="text-lg">{title}</h2>
-        {action ? (
-          <button className="btn-line" type="button" onClick={() => setEditing(true)}>Modifier</button>
-        ) : null}
-      </div>
+    <Section title={title} startOpen extra={action ? <button className="btn-line" type="button" onClick={() => setEditing(true)}><MotionIcon icon={pencil} /><span>Modifier</span></button> : undefined}>
       <div>{children}</div>
       <Popup open={editing} title="Ordre de réception" onClose={() => setEditing(false)}>
         <ReceptionEditor
@@ -151,7 +155,7 @@ function Sheet({
           }}
         />
       </Popup>
-    </section>
+    </Section>
   );
 }
 
@@ -161,13 +165,7 @@ function WorkshopBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolea
   const sheet = dossier.workshop;
   const chef = state ? byPost(state, "Chef d’atelier")?.name ?? "" : "";
   return (
-    <section className="glass p-6">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg">Fiche d’atelier</h2>
-        {canEdit ? (
-          <button className="btn-line" type="button" onClick={() => setEditing(true)}>{sheet ? "Modifier" : "Remplir"}</button>
-        ) : null}
-      </div>
+    <Section title="Fiche d’atelier" extra={canEdit ? <button className="btn-line" type="button" onClick={() => setEditing(true)}><MotionIcon icon={pencil} /><span>{sheet ? "Modifier" : "Remplir"}</span></button> : undefined}>
       <Popup open={editing} title="Fiche d’atelier" onClose={() => setEditing(false)}>
         <WorkshopEditor
           initial={sheet ?? emptyWorkshop(dossier, actorName, chef)}
@@ -203,7 +201,7 @@ function WorkshopBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolea
       ) : (
         <p className="quiet">La fiche d’atelier n’est pas encore ouverte.</p>
       )}
-    </section>
+    </Section>
   );
 }
 
@@ -218,13 +216,7 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
   const frozen = Boolean(dossier.invoice);
 
   return (
-    <section className="glass p-6">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg">Éléments à traiter</h2>
-        {canAdd && !frozen ? (
-          <button className="btn-line" type="button" onClick={() => setOpen(true)}>Ajouter</button>
-        ) : null}
-      </div>
+    <Section title="Éléments à traiter" extra={canAdd && !frozen ? <button className="btn-line" type="button" onClick={() => setOpen(true)}><MotionIcon icon={plus} /><span>Ajouter</span></button> : undefined}>
       <Popup open={open} title="Ajouter une pièce" onClose={() => setOpen(false)}>
         <form
           className="grid gap-3"
@@ -275,7 +267,7 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
             <span className="label">Constat</span>
             <input className="field" value={constat} onChange={(event) => setConstat(event.target.value)} />
           </label>
-          <button className="btn" type="submit">Ajouter au dossier</button>
+          <button className="btn" type="submit"><MotionIcon icon={plus} /><span>Ajouter au dossier</span></button>
         </form>
       </Popup>
       <div className="grid gap-3">
@@ -283,7 +275,7 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
           <PartRow key={part.id} part={part} dossier={dossier} canMoney={canMoney} frozen={frozen} />
         )) : <p className="quiet">Aucune pièce relevée pour l’instant.</p>}
       </div>
-    </section>
+    </Section>
   );
 }
 
@@ -317,24 +309,24 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
             const amount = parseAmount(price);
             if (amount === null) return;
             run({ type: "setPartPrice", payload: { dossierId: dossier.id, partId: part.id, unitPrice: amount, actor: actorName } }, "Prix enregistré");
-          }}>Prix de vente</button>
+          }}><MotionIcon icon={pencil} /><span>Prix de vente</span></button>
           {product && !part.served ? (
             <button className="btn-line" type="button" onClick={() => run({ type: "serveFromStock", payload: { dossierId: dossier.id, partId: part.id, actor: actorName } }, "Sorti du stock")}>
-              Prendre au stock
+              <MotionIcon icon={download} /><span>Prendre au stock</span>
             </button>
           ) : null}
           {!part.served && !purchase ? (
-            <button className="btn-line" type="button" onClick={() => setAsk(true)}>Demander l’achat</button>
+            <button className="btn-line" type="button" onClick={() => setAsk(true)}><MotionIcon icon={plus} /><span>Demander l’achat</span></button>
           ) : null}
           {!part.served ? (
-            <button className="btn-ghost" type="button" onClick={() => run({ type: "removePart", payload: { dossierId: dossier.id, partId: part.id, actor: actorName } }, "Pièce retirée")}>Retirer</button>
+            <button className="btn-ghost" type="button" onClick={() => run({ type: "removePart", payload: { dossierId: dossier.id, partId: part.id, actor: actorName } }, "Pièce retirée")}><MotionIcon icon={trash} /><span>Retirer</span></button>
           ) : null}
         </div>
       ) : null}
       {purchase && role === "direction" && purchase.status === "a_valider" ? (
         <div className="mt-3 flex gap-2">
-          <button className="btn" type="button" onClick={() => run({ type: "validatePurchase", payload: { purchaseId: purchase.id, actor: actorName } }, "Achat validé")}>Valider l’achat</button>
-          <button className="btn-line" type="button" onClick={() => run({ type: "refusePurchase", payload: { purchaseId: purchase.id, actor: actorName } }, "Achat refusé")}>Refuser</button>
+          <button className="btn" type="button" onClick={() => run({ type: "validatePurchase", payload: { purchaseId: purchase.id, actor: actorName } }, "Achat validé")}><MotionIcon icon={checkAll} /><span>Valider l’achat</span></button>
+          <button className="btn-line" type="button" onClick={() => run({ type: "refusePurchase", payload: { purchaseId: purchase.id, actor: actorName } }, "Achat refusé")}><MotionIcon icon={closeIcon} /><span>Refuser</span></button>
         </div>
       ) : null}
       <Popup open={ask} title="Demander l’achat" onClose={() => setAsk(false)}>
@@ -348,7 +340,7 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
               type: "requestPurchase",
               payload: { dossierId: dossier.id, partId: part.id, qty: part.qty, maxPrice: amount, deadline, actor: actorName },
             }, "Demande envoyée à la direction").then((ok) => { if (ok) setAsk(false); });
-          }}>Envoyer</button>
+          }}><MotionIcon icon={checkAll} /><span>Envoyer</span></button>
         </div>
       </Popup>
     </article>
@@ -364,14 +356,7 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
   const bill = moneyOf(invoice, dossier.depositPaid);
   const frozen = Boolean(dossier.invoice);
   return (
-    <section className="glass p-6" id="facture">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="kicker">{invoice.number}</p>
-          <h2 className="text-lg">Facture</h2>
-        </div>
-        <button className="btn-line no-print" type="button" onClick={() => window.print()}>Imprimer</button>
-      </div>
+    <Section title={`Facture ${invoice.number}`} extra={<button className="btn-line no-print" type="button" onClick={() => window.print()}><MotionIcon icon={download} /><span>Imprimer</span></button>}>
       {invoice.lines.map((line) => (
         <div className="row" key={line.id}>
           <span>{line.qty} × {line.label}</span>
@@ -387,9 +372,9 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
       {frozen ? <p className="hint mt-3">Facture figée le {formatWhen(dossier.invoice?.readyAt ?? "")}.</p> : null}
       {canMoney && !frozen ? (
         <div className="no-print mt-4 flex flex-wrap gap-2">
-          <button className="btn-line" type="button" onClick={() => setLaborOpen(true)}>Main-d’œuvre</button>
+          <button className="btn-line" type="button" onClick={() => setLaborOpen(true)}><MotionIcon icon={pencil} /><span>Main-d’œuvre</span></button>
           <button className="btn" type="button" onClick={() => run({ type: "markInvoiceReady", payload: { dossierId: dossier.id, actor: actorName } }, "Facture prête")}>
-            Rendre la facture prête
+            <MotionIcon icon={checkAll} /><span>Rendre la facture prête</span>
           </button>
         </div>
       ) : null}
@@ -402,15 +387,15 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
             run({ type: "setLabor", payload: { dossierId: dossier.id, labor: amount, actor: actorName } }, "Main-d’œuvre enregistrée").then((ok) => {
               if (ok) setLaborOpen(false);
             });
-          }}>Enregistrer</button>
+          }}><MotionIcon icon={checkAll} /><span>Enregistrer</span></button>
         </div>
       </Popup>
       {canMoney && frozen && dossier.depositPaid === 0 && dossier.status !== "reparation_faite" ? (
         <button className="btn-ghost no-print mt-2" type="button" onClick={() => run({ type: "reopenInvoice", payload: { dossierId: dossier.id, actor: actorName } }, "Facture rouverte")}>
-          Rouvrir la facture
+          <MotionIcon icon={backup} /><span>Rouvrir la facture</span>
         </button>
       ) : null}
-    </section>
+    </Section>
   );
 }
 
@@ -434,12 +419,13 @@ function DepositBanner({
   const [amount, setAmount] = useState(String(Math.max(due - paid, 0)));
   const locked = dossier.status !== "reparation_faite" && !covered;
   return (
-    <section className={`glass p-5 ${locked ? "" : ""}`}>
+    <Section
+      title="Règlement"
+      startOpen
+      extra={canRecord && balance > 0 && dossier.invoice ? <button className="btn-line no-print" type="button" onClick={() => setOpen(true)}><MotionIcon icon={checkAll} /><span>Encaisser</span></button> : undefined}
+    >
       <p className="text-sm">{locked ? "La réparation ne commence qu’après 70 % de la facture." : covered && dossier.status !== "reparation_faite" ? "Acompte reçu. L’atelier peut réparer." : "Paiement à jour."}</p>
       <p className="mt-1">Acompte {gnf(due)} · reçu {gnf(paid)} · reste {gnf(balance)}</p>
-      {canRecord && balance > 0 && dossier.invoice ? (
-        <button className="btn-line no-print mt-3" type="button" onClick={() => setOpen(true)}>Enregistrer un paiement</button>
-      ) : null}
       <Popup open={open} title="Encaisser" onClose={() => setOpen(false)}>
         <div className="grid gap-3">
           <input className="field" inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />
@@ -449,10 +435,10 @@ function DepositBanner({
             run({ type: "recordDeposit", payload: { dossierId: dossier.id, amount: value, actor: actorName } }, "Paiement enregistré").then((ok) => {
               if (ok) setOpen(false);
             });
-          }}>Encaisser</button>
+          }}><MotionIcon icon={checkAll} /><span>Encaisser</span></button>
         </div>
       </Popup>
-    </section>
+    </Section>
   );
 }
 
@@ -464,11 +450,7 @@ function ReportBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolean 
   const director = byPost(state, "Directeur technique")?.name ?? "";
   const payable = dossier.status === "paiement_effectue" || dossier.status === "reparation_faite" || (dossier.invoice ? moneyOf(dossier.invoice, dossier.depositPaid).covered : false);
   return (
-    <section className="glass p-6">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg">Rapport d’activité</h2>
-        {canEdit ? <button className="btn-line" type="button" onClick={() => setEditing(true)}>{report ? "Modifier" : "Rédiger"}</button> : null}
-      </div>
+    <Section title="Rapport d’activité" extra={canEdit ? <button className="btn-line" type="button" onClick={() => setEditing(true)}><MotionIcon icon={pencil} /><span>{report ? "Modifier" : "Rédiger"}</span></button> : undefined}>
       <Popup open={editing} title="Rapport d’activité" onClose={() => setEditing(false)}>
         <ReportEditor
           initial={reportDraft(state, dossier, director)}
@@ -520,12 +502,12 @@ function ReportBlock({ dossier, canEdit }: { dossier: Dossier; canEdit: boolean 
             disabled={!payable || !dossier.report}
             onClick={() => run({ type: "finishRepair", payload: { dossierId: dossier.id, actor: actorName } }, "Réparation terminée")}
           >
-            Clôturer la réparation
+            <MotionIcon icon={checkAll} /><span>Clôturer la réparation</span>
           </button>
           {!payable ? <p className="hint mt-2">Bloqué tant que la comptabilité n’a pas confirmé le règlement.</p> : null}
         </div>
       ) : null}
-    </section>
+    </Section>
   );
 }
 
@@ -536,15 +518,11 @@ function Meeting({ dossier }: { dossier: Dossier }) {
   const [text, setText] = useState(`Bonjour ${clientName}, le directeur technique du Garage Auto HR souhaite vous voir au sujet du ${dossier.reception.makeModel} ${dossier.reception.plate}. Quand pouvez-vous passer ?`);
   if (role !== "direction" && !dossier.notes.length) return null;
   return (
-    <section className="glass no-print p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg">Voir le client</h2>
-        {role === "direction" ? <button className="btn" type="button" onClick={() => setOpen(true)}>Demander à voir le client</button> : null}
-      </div>
+    <Section className="no-print" title="Voir le client" extra={role === "direction" ? <button className="btn" type="button" onClick={() => setOpen(true)}><MotionIcon icon={account} /><span>Demander</span></button> : undefined}>
       <Popup open={open} title="Voir le client" onClose={() => setOpen(false)}>
         <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} />
         <button className="btn mt-3" type="button" onClick={() => run({ type: "requestClientMeeting", payload: { dossierId: dossier.id, text, actor: actorName } }, "Demande notée").then((ok) => { if (ok) setOpen(false); })}>
-          Noter la demande
+          <MotionIcon icon={checkAll} /><span>Noter la demande</span>
         </button>
       </Popup>
       <div className="mt-3 grid gap-2">
@@ -552,21 +530,20 @@ function Meeting({ dossier }: { dossier: Dossier }) {
           <p key={note.id} className="text-sm"><strong>{note.author}</strong> · {formatWhen(note.at)} — {note.text}</p>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 
 function Journal({ dossier }: { dossier: Dossier }) {
   if (!dossier.events.length) return null;
   return (
-    <section className="px-2">
-      <p className="kicker mb-2">Journal</p>
+    <Section title="Journal">
       <ul className="grid gap-1">
         {dossier.events.slice(0, 8).map((event) => (
           <li key={event.id} className="quiet text-sm">{formatWhen(event.at)} · {event.actor} — {event.text}</li>
         ))}
       </ul>
-    </section>
+    </Section>
   );
 }
 
@@ -574,9 +551,8 @@ function PublishStatus({ dossier }: { dossier: Dossier }) {
   const { role, run, actorName } = useGarage();
   if (role !== "comptabilite") return null;
   return (
-    <section className="glass p-6">
-      <h2 className="text-lg">Statut visible par le client</h2>
-      <p className="quiet mt-1 text-sm">Seul ce bouton met à jour ce que le client voit. Tant qu’il n’est pas publié, le client ne voit pas de statut.</p>
+    <Section title="Statut visible par le client" startOpen>
+      <p className="quiet text-sm">Seul ce bouton met à jour ce que le client voit. Tant qu’il n’est pas publié, le client ne voit pas de statut.</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {STATUSES.map((status) => (
           <button
@@ -585,11 +561,12 @@ function PublishStatus({ dossier }: { dossier: Dossier }) {
             type="button"
             onClick={() => run({ type: "setClientStatus", payload: { dossierId: dossier.id, status, actor: actorName } }, "Statut publié au client")}
           >
-            {STATUS_LABEL[status]}
+            <MotionIcon icon={checkAll} />
+            <span>{STATUS_LABEL[status]}</span>
           </button>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 
@@ -599,11 +576,7 @@ function DirectionComments({ dossier }: { dossier: Dossier }) {
   const [open, setOpen] = useState(false);
   const comments = dossier.notes.filter((note) => note.kind === "commentaire");
   return (
-    <section className="glass p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg">Commentaires de la direction</h2>
-        {role === "direction" ? <button className="btn-line" type="button" onClick={() => setOpen(true)}>Écrire</button> : null}
-      </div>
+    <Section title="Commentaires de la direction" extra={role === "direction" ? <button className="btn-line" type="button" onClick={() => setOpen(true)}><MotionIcon icon={pencil} /><span>Écrire</span></button> : undefined}>
       <Popup open={open} title="Commentaire" onClose={() => setOpen(false)}>
         <form
           className="grid gap-3"
@@ -618,7 +591,7 @@ function DirectionComments({ dossier }: { dossier: Dossier }) {
           }}
         >
           <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} placeholder="Commentaire sur ce dossier" />
-          <button className="btn" type="submit" disabled={!text.trim()}>Publier le commentaire</button>
+          <button className="btn" type="submit" disabled={!text.trim()}><MotionIcon icon={checkAll} /><span>Publier le commentaire</span></button>
         </form>
       </Popup>
       {role === "direction" ? null : (
@@ -629,6 +602,6 @@ function DirectionComments({ dossier }: { dossier: Dossier }) {
           <p key={note.id} className="text-sm"><strong>{note.author}</strong> · {formatWhen(note.at)} — {note.text}</p>
         )) : <p className="quiet text-sm">Aucun commentaire.</p>}
       </div>
-    </section>
+    </Section>
   );
 }

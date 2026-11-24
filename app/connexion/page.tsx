@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import login from "@iconify-icons/line-md/login";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, spaceLabel } from "@/lib/accounts";
+import { Gear, MotionIcon } from "@/components/motion-icon";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -58,7 +60,8 @@ export default function LoginPage() {
           </label>
           {error ? <p className="mt-3 text-sm text-[#8e322c]">{error}</p> : null}
           <button className="btn mt-5 w-full" type="submit" disabled={pending}>
-            {pending ? "Ouverture…" : "Entrer"}
+            {pending ? <Gear spinning /> : <MotionIcon icon={login} />}
+            <span>{pending ? "Ouverture…" : "Entrer"}</span>
           </button>
           <p className="hint mt-6">Comptes livrés · mot de passe {DEMO_PASSWORD}</p>
           <div className="account-grid mt-2">

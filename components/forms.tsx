@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import checkAll from "@iconify-icons/line-md/check-all";
+import closeIcon from "@iconify-icons/line-md/close";
+import plus from "@iconify-icons/line-md/plus";
 import { AreaField, Choice, SignaturePad, TextField } from "@/components/kit";
+import { Gear, MotionIcon } from "@/components/motion-icon";
 import { blankTask } from "@/lib/domain";
 import { SECTIONS } from "@/lib/format";
 import type { ActivityReport, ReceptionOrder, WorkshopSheet } from "@/lib/types";
@@ -68,14 +72,8 @@ export function ReceptionEditor({
         </section>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        <button className="btn" type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : submitLabel}
-        </button>
-        {onCancel ? (
-          <button className="btn-line" type="button" onClick={onCancel}>
-            Annuler
-          </button>
-        ) : null}
+        <SaveButton pending={pending} label={submitLabel} />
+        {onCancel ? <CancelButton onClick={onCancel} /> : null}
       </div>
     </form>
   );
@@ -164,7 +162,8 @@ export function WorkshopEditor({
           </div>
         ))}
         <button className="btn-line" type="button" onClick={() => set("tasks", [...draft.tasks, blankTask()])}>
-          Ajouter un travail
+          <MotionIcon icon={plus} />
+          <span>Ajouter un travail</span>
         </button>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
@@ -174,10 +173,28 @@ export function WorkshopEditor({
         <SignaturePad value={draft.chefSignature} onChange={(value) => set("chefSignature", value)} />
       </div>
       <div className="flex gap-2">
-        <button className="btn" type="submit" disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer la fiche"}</button>
-        <button className="btn-line" type="button" onClick={onCancel}>Annuler</button>
+        <SaveButton pending={pending} label="Enregistrer la fiche" />
+        <CancelButton onClick={onCancel} />
       </div>
     </form>
+  );
+}
+
+function SaveButton({ pending, label }: { pending: boolean; label: string }) {
+  return (
+    <button className="btn" type="submit" disabled={pending}>
+      {pending ? <Gear spinning /> : <MotionIcon icon={checkAll} />}
+      <span>{pending ? "Enregistrement…" : label}</span>
+    </button>
+  );
+}
+
+function CancelButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button className="btn-line" type="button" onClick={onClick}>
+      <MotionIcon icon={closeIcon} />
+      <span>Annuler</span>
+    </button>
   );
 }
 
@@ -233,8 +250,8 @@ export function ReportEditor({
         <SignaturePad value={draft.directorSignature} onChange={(value) => set("directorSignature", value)} />
       </div>
       <div className="flex gap-2 md:col-span-2">
-        <button className="btn" type="submit" disabled={pending}>{pending ? "Enregistrement…" : "Enregistrer le rapport"}</button>
-        <button className="btn-line" type="button" onClick={onCancel}>Annuler</button>
+        <SaveButton pending={pending} label="Enregistrer le rapport" />
+        <CancelButton onClick={onCancel} />
       </div>
     </form>
   );

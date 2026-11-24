@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import plus from "@iconify-icons/line-md/plus";
+import checkAll from "@iconify-icons/line-md/check-all";
 import { useGarage } from "@/components/garage-provider";
+import { MotionIcon } from "@/components/motion-icon";
 import { Empty } from "@/components/kit";
 import { Popup } from "@/components/popup";
 import { gnf, parseAmount } from "@/lib/format";
@@ -47,7 +50,7 @@ export function PriceGrid() {
       </header>
       <div className="flex flex-wrap items-center gap-3">
         <input className="field max-w-md" value={query} placeholder="Chercher une pièce" onChange={(event) => setQuery(event.target.value)} />
-        <button className="btn" type="button" onClick={() => setCreateOpen(true)}>Nouveau produit</button>
+        <button className="btn" type="button" onClick={() => setCreateOpen(true)}><MotionIcon icon={plus} /><span>Nouveau produit</span></button>
       </div>
       <div className="grid gap-3">
         {products.map((product) => {
@@ -76,7 +79,7 @@ export function PriceGrid() {
                   run({ type: "saveProduct", payload: { product: { ...product, price, stock }, actor: actorName } }, "Grille mise à jour");
                 }}
               >
-                Enregistrer
+                <MotionIcon icon={checkAll} /><span>Enregistrer</span>
               </button>
             </article>
           );
@@ -99,7 +102,7 @@ export function PriceGrid() {
           <input className="field" placeholder="Catégorie" value={creating.category} onChange={(event) => setCreating({ ...creating, category: event.target.value })} />
           <input className="field" placeholder="Prix" inputMode="numeric" value={creating.price || ""} onChange={(event) => setCreating({ ...creating, price: parseAmount(event.target.value) ?? 0 })} />
           <input className="field" placeholder="Stock" inputMode="numeric" value={creating.stock || ""} onChange={(event) => setCreating({ ...creating, stock: parseAmount(event.target.value) ?? 0 })} />
-          <button className="btn" type="submit">Ajouter à la grille</button>
+          <button className="btn" type="submit"><MotionIcon icon={plus} /><span>Ajouter à la grille</span></button>
         </form>
       </Popup>
     </div>

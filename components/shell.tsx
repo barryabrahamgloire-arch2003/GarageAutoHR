@@ -18,25 +18,28 @@ import logoutIcon from "@iconify-icons/line-md/logout";
 import foldLeft from "@iconify-icons/line-md/menu-fold-left";
 import foldRight from "@iconify-icons/line-md/menu-fold-right";
 import chevronUp from "@iconify-icons/line-md/chevron-up";
+import chevronDown from "@iconify-icons/line-md/chevron-down";
+import backup from "@iconify-icons/line-md/backup-restore";
+import closeIcon from "@iconify-icons/line-md/close";
 import { useGarage } from "@/components/garage-provider";
 import { Gear, MotionIcon } from "@/components/motion-icon";
 import { spaceLabel } from "@/lib/accounts";
 import type { Role } from "@/lib/types";
 
-const LINKS: Record<Role, { href: string; label: string; icon: IconifyIcon; match: (path: string) => boolean }[]> = {
+const LINKS: Record<Role, { href: string; label: string; tab?: string; icon: IconifyIcon; match: (path: string) => boolean }[]> = {
   reception: [
     { href: "/", label: "Accueil", icon: home, match: (path) => path === "/" },
     { href: "/demandes", label: "Demandes", icon: email, match: (path) => path.startsWith("/demandes") },
-    { href: "/nouveau", label: "Nouvel ordre", icon: plus, match: (path) => path.startsWith("/nouveau") },
+    { href: "/nouveau", label: "Nouvel ordre", tab: "Ordre", icon: plus, match: (path) => path.startsWith("/nouveau") },
   ],
   atelier: [{ href: "/", label: "Atelier", icon: engine, match: (path) => path === "/" || path.startsWith("/dossier") }],
   comptabilite: [
     { href: "/", label: "Accueil", icon: home, match: (path) => path === "/" || path.startsWith("/dossier") },
     { href: "/grille", label: "Grille", icon: clipboard, match: (path) => path.startsWith("/grille") },
   ],
-  achats: [{ href: "/", label: "À acheter", icon: briefcase, match: () => true }],
+  achats: [{ href: "/", label: "À acheter", tab: "Achats", icon: briefcase, match: () => true }],
   direction: [{ href: "/", label: "Dossiers", icon: documents, match: (path) => path === "/" || path.startsWith("/dossier") }],
-  client: [{ href: "/", label: "Mes voitures", icon: steering, match: () => true }],
+  client: [{ href: "/", label: "Mes voitures", tab: "Voitures", icon: steering, match: () => true }],
 };
 
 export function Shell({ children }: { children: ReactNode }) {
@@ -79,7 +82,8 @@ export function Shell({ children }: { children: ReactNode }) {
           <h1 className="mt-4 text-2xl font-bold">Espace inaccessible</h1>
           <p className="quiet mt-3">{error || "Reconnectez-vous pour ouvrir votre interface."}</p>
           <button className="btn mt-5" type="button" onClick={() => refresh().catch(() => undefined)}>
-            Réessayer
+            <MotionIcon icon={backup} />
+            <span>Réessayer</span>
           </button>
         </div>
       </div>
@@ -144,21 +148,33 @@ function Sidebar({ compact, onToggle }: { compact: boolean; onToggle: () => void
 function BottomNav({ away, onToggle }: { away: boolean; onToggle: () => void }) {
   const path = usePathname();
   const { role, logout } = useGarage();
+  if (away) {
+    return (
+      <nav className="tabbar is-away no-print" aria-label="Menu">
+        <button className="tab-handle" type="button" onClick={onToggle} aria-label="Ouvrir le menu">
+          <MotionIcon icon={chevronUp} />
+          <span>Menu</span>
+        </button>
+      </nav>
+    );
+  }
   return (
-    <nav className={cn("tabbar no-print", away && "is-away")} aria-label="Menu">
-      <button className="tab-handle" type="button" onClick={onToggle} aria-label={away ? "Ouvrir le menu" : "Réduire le menu"}>
-        <MotionIcon icon={away ? chevronUp : foldLeft} />
-      </button>
+    <nav className="tabbar no-print" aria-label="Menu">
       <div className="tab-links">
         {LINKS[role].map((link) => (
-          <Link key={link.href + link.label} href={link.href} className={link.match(path) ? "on" : ""} title={link.label} aria-label={link.label}>
-            <MotionIcon icon={link.icon} label={link.label} />
+          <Link key={link.href + link.label} href={link.href} className={cn("tab-item", link.match(path) && "on")} aria-label={link.label}>
+            <MotionIcon icon={link.icon} label={link.tab ?? link.label} />
+            <span>{link.tab ?? link.label}</span>
           </Link>
         ))}
-        <button type="button" title="Sortir" aria-label="Sortir" onClick={() => logout().catch(() => undefined)}>
+        <button className="tab-item" type="button" aria-label="Sortir" onClick={() => logout().catch(() => undefined)}>
           <MotionIcon icon={logoutIcon} label="Sortir" />
+          <span>Sortir</span>
         </button>
       </div>
+      <button className="tab-handle" type="button" onClick={onToggle} aria-label="Réduire le menu">
+        <MotionIcon icon={chevronDown} />
+      </button>
     </nav>
   );
 }
@@ -169,7 +185,8 @@ function ImpersonationBanner({ name, role }: { name: string; role: Role | "super
     <div className="impersonate no-print">
       <p>Interface de {name} · {spaceLabel(role)}</p>
       <button className="btn" type="button" onClick={() => stopImpersonation().catch(() => undefined)}>
-        Quitter
+        <MotionIcon icon={closeIcon} />
+        <span>Quitter</span>
       </button>
     </div>
   );

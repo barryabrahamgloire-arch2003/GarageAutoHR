@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { MessageCircle } from "lucide-react";
-import { Gear } from "@/components/motion-icon";
+import chat from "@iconify-icons/line-md/chat";
+import trash from "@iconify-icons/line-md/trash";
+import chevronDown from "@iconify-icons/line-md/chevron-down";
+import chevronUp from "@iconify-icons/line-md/chevron-up";
+import { Gear, MotionIcon } from "@/components/motion-icon";
 import { STATUSES, type Status } from "@/lib/types";
 import { STATUS_LABEL, whatsappHref } from "@/lib/format";
 import type { Talk } from "@/lib/talk";
@@ -152,7 +155,8 @@ export function SignaturePad({ value, onChange }: { value: string; onChange: (im
       <div className="flex items-center justify-between">
         <span className="label">Signature</span>
         <button type="button" className="btn-ghost" onClick={clear}>
-          Effacer
+          <MotionIcon icon={trash} />
+          <span>Effacer</span>
         </button>
       </div>
       <canvas ref={ref} className="sign" onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end} />
@@ -175,6 +179,38 @@ export function SignatureView({ image, name }: { image?: string; name?: string }
         />
       ) : null}
     </div>
+  );
+}
+
+export function Section({
+  title,
+  extra,
+  children,
+  startOpen = false,
+  className,
+}: {
+  title: string;
+  extra?: ReactNode;
+  children: ReactNode;
+  startOpen?: boolean;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(startOpen);
+  return (
+    <section className={className ? `glass panel ${className}` : "glass panel"}>
+      <div className="panel-bar">
+        <button className="panel-toggle" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+          <MotionIcon icon={open ? chevronUp : chevronDown} />
+          <span>{title}</span>
+        </button>
+        {extra}
+      </div>
+      <div className={open ? "fold open" : "fold"}>
+        <div>
+          <div className="panel-body">{children}</div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -209,7 +245,7 @@ export function WhatsApp({ talk }: { talk: Talk }) {
   return (
     <a className="chip" href={whatsappHref(talk.phone, talk.text)} target="_blank" rel="noreferrer">
       <small className="inline-flex items-center gap-1">
-        <MessageCircle size={13} /> {talk.role}
+        <MotionIcon icon={chat} /> {talk.role}
       </small>
       <strong>{talk.name}</strong>
     </a>
