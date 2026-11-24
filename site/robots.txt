@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /avis
+Disallow: /vue-avis
+
+Sitemap: https://www.garageautohrco.com/sitemap.xml

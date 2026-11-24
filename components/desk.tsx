@@ -8,11 +8,15 @@ import clipboard from "@iconify-icons/line-md/clipboard-list";
 import checkAll from "@iconify-icons/line-md/check-all";
 import closeIcon from "@iconify-icons/line-md/close";
 import pencil from "@iconify-icons/line-md/pencil";
+import account from "@iconify-icons/line-md/account";
+import chevronRight from "@iconify-icons/line-md/chevron-right";
+import steering from "@iconify-icons/line-md/steering";
 import { useGarage } from "@/components/garage-provider";
 import { MotionIcon } from "@/components/motion-icon";
-import { Empty, WhatsAppList } from "@/components/kit";
+import { Empty, StatusMark, WhatsAppList } from "@/components/kit";
 import { Popup } from "@/components/popup";
 import { gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
+import { keepPhoto } from "@/lib/photo";
 import { clientDossiers, nextAction, sortDossiers, titleOf } from "@/lib/selectors";
 import { roleLabel } from "@/lib/talk";
 import type { Dossier, Purchase } from "@/lib/types";
@@ -100,7 +104,7 @@ function groupsFor(role: "reception" | "atelier" | "comptabilite", dossiers: Dos
 function Header({ kicker, title, text, action, stats }: { kicker: string; title: string; text: string; action?: ReactNode; stats?: { label: string; value: number }[] }) {
   return (
     <header className="home-hero">
-      <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo" />
+      <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo logo-tile" />
       <div>
         <p className="kicker">{kicker}</p>
         <h1 className="mt-1">{title}</h1>
@@ -122,21 +126,31 @@ function CarCard({ dossier }: { dossier: Dossier }) {
   const { state, role } = useGarage();
   if (!state) return null;
   const title = titleOf(state, dossier);
+  const status = role === "client" ? dossier.clientStatus : dossier.status;
+  const label = status ? STATUS_LABEL[status] : "Statut non publié";
+  const hint = role === "client"
+    ? (dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut.")
+    : role === "atelier"
+      ? atelierHint(dossier)
+      : nextAction(dossier);
+  const photo = keepPhoto(dossier.photo);
   return (
     <Link href={`/dossier/${dossier.id}`} className="car">
-      <span className={role === "client" && !dossier.clientStatus ? "badge wait" : "badge"}>
-        {role === "client" ? (dossier.clientStatus ? STATUS_LABEL[dossier.clientStatus] : "Statut non publié") : STATUS_LABEL[dossier.status]}
-      </span>
-      <p className="plate">{title.plate}</p>
-      <p>{title.model}</p>
-      <p className="text-sm">{title.client}</p>
-      <p className="mt-auto text-sm text-[#16181c]">
-        {role === "client"
-          ? (dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut.")
-          : role === "atelier"
-            ? atelierHint(dossier)
-            : nextAction(dossier)}
-      </p>
+      <div className="car-visual">
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photo} alt="" />
+        ) : (
+          <span className="car-fallback" aria-hidden="true"><MotionIcon icon={steering} size={40} /></span>
+        )}
+        <StatusMark status={status} label={label} />
+      </div>
+      <div className="car-body">
+        <p className="plate-chip">{title.plate}</p>
+        <strong>{title.model}</strong>
+        <p className="car-meta"><MotionIcon icon={account} size={16} /><span>{title.client}</span></p>
+        <p className="car-next"><MotionIcon icon={chevronRight} size={16} /><span>{hint}</span></p>
+      </div>
     </Link>
   );
 }

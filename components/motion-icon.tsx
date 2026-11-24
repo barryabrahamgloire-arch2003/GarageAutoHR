@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { Icon, type IconifyIcon } from "@iconify/react";
 
-export function MotionIcon({ icon, label }: { icon: IconifyIcon; label?: string }) {
+export function MotionIcon({ icon, label, size = 22 }: { icon: IconifyIcon; label?: string; size?: number }) {
   const [play, setPlay] = useState(0);
   return (
     <span
       className="motion-icon"
       title={label}
+      style={{ width: size, height: size }}
       onMouseEnter={() => setPlay((value) => value + 1)}
       onFocus={() => setPlay((value) => value + 1)}
     >
-      <Icon key={play} icon={icon} width="22" height="22" />
+      <Icon key={play} icon={icon} width={size} height={size} />
     </span>
   );
 }

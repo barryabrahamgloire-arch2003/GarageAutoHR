@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useGarage } from "@/components/garage-provider";
 import { ReceptionEditor, ReportEditor, WorkshopEditor } from "@/components/forms";
-import { Empty, PaperRow, Section, SignatureView, StatusRail, WhatsAppList } from "@/components/kit";
+import { Empty, PaperRow, Section, SignatureView, StatusMark, StatusRail, WhatsAppList } from "@/components/kit";
 import { MotionIcon } from "@/components/motion-icon";
 import { Popup } from "@/components/popup";
 import pencil from "@iconify-icons/line-md/pencil";
@@ -18,6 +18,7 @@ import download from "@iconify-icons/line-md/download";
 import arrowLeft from "@iconify-icons/line-md/arrow-left";
 import { emptyWorkshop, liveInvoice, moneyOf, reportDraft } from "@/lib/domain";
 import { formatDay, formatWhen, gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
+import { keepPhoto } from "@/lib/photo";
 import { byPost, clientOf } from "@/lib/selectors";
 import { talkTo } from "@/lib/talk";
 import { STATUSES, type Dossier, type PartNeed } from "@/lib/types";
@@ -38,6 +39,8 @@ export function DossierScreen({ id }: { id: string }) {
   if (!client) return <Empty title="Client manquant" text="Le dossier n’a pas de client." />;
 
   const talks = talkTo(state, dossier, role, garage.actorName);
+  const photo = keepPhoto(dossier.photo);
+  const shownStatus = role === "client" ? dossier.clientStatus : dossier.status;
   const billSource = liveInvoice(dossier, state.settings);
   const bill = dossier.parts.length || dossier.labor > 0 || dossier.invoice ? moneyOf(billSource, dossier.depositPaid) : null;
   const canEditReception = role === "reception" || role === "atelier";
@@ -47,7 +50,12 @@ export function DossierScreen({ id }: { id: string }) {
 
   return (
     <div className="rise grid gap-5">
-      <header className="glass p-6 md:p-8">
+      <header className="glass dossier-head p-6 md:p-8">
+        {photo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="dossier-photo" src={photo} alt={`Photo ${dossier.reception.plate}`} />
+        ) : null}
+        <div>
         <p className="kicker">{dossier.number} · {client.company || client.name}</p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -55,13 +63,14 @@ export function DossierScreen({ id }: { id: string }) {
             <p className="mt-2 text-lg">{dossier.reception.makeModel}</p>
             <p className="quiet">{dossier.reception.engine}{client.driver ? ` · Chauffeur ${client.driver}` : ""}</p>
           </div>
-          {role === "client" ? (
-            <p className="max-w-sm text-sm">
-              {dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut de cette voiture."}
+          <div className="grid max-w-sm justify-items-start gap-2">
+            <StatusMark status={shownStatus} label={shownStatus ? STATUS_LABEL[shownStatus] : "Statut non publié"} />
+            <p className="text-sm">
+              {role === "client"
+                ? (dossier.clientStatus ? STATUS_HELP[dossier.clientStatus] : "La comptabilité n’a pas encore publié le statut de cette voiture.")
+                : STATUS_HELP[dossier.status]}
             </p>
-          ) : (
-            <p className="max-w-sm text-sm">{STATUS_HELP[dossier.status]}</p>
-          )}
+          </div>
         </div>
         <div className="mt-5">
           {role === "client" ? (
@@ -69,6 +78,7 @@ export function DossierScreen({ id }: { id: string }) {
           ) : (
             <StatusRail status={dossier.status} />
           )}
+        </div>
         </div>
       </header>
       {role === "client" ? null : (<>

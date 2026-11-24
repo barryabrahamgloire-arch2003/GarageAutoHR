@@ -7,6 +7,7 @@ import arrowLeft from "@iconify-icons/line-md/arrow-left";
 import plus from "@iconify-icons/line-md/plus";
 import { useGarage } from "@/components/garage-provider";
 import { MotionIcon } from "@/components/motion-icon";
+import { CarPhoto } from "@/components/car-photo";
 import { ReceptionEditor } from "@/components/forms";
 import { Empty } from "@/components/kit";
 import { Popup } from "@/components/popup";
@@ -16,6 +17,7 @@ export function NewReception() {
   const router = useRouter();
   const { role, actorName, dispatch } = useGarage();
   const [open, setOpen] = useState(true);
+  const [photo, setPhoto] = useState("");
   if (role !== "reception" && role !== "atelier") {
     return <Empty title="Réception" text="L’ordre de réception se remplit à l’accueil ou par un garagiste." action={<button className="btn" type="button" onClick={() => router.push("/")}><MotionIcon icon={arrowLeft} /><span>Retour</span></button>} />;
   }
@@ -29,6 +31,7 @@ export function NewReception() {
       </header>
       <button className="btn w-fit" type="button" onClick={() => setOpen(true)}><MotionIcon icon={plus} /><span>Remplir l’ordre</span></button>
       <Popup open={open} title="Ordre de réception" onClose={() => setOpen(false)}>
+        <CarPhoto value={photo} onChange={setPhoto} />
         <ReceptionEditor
           initial={emptyReception(actorName)}
           includeDiagnostic={false}
@@ -38,7 +41,7 @@ export function NewReception() {
             try {
               const next = await dispatch({
                 type: "openReception",
-                payload: { ...order, actor: actorName || order.receptionist },
+                payload: { ...order, photo, actor: actorName || order.receptionist },
               });
               const created = next.dossiers.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
               if (created) router.push(`/dossier/${created.id}`);

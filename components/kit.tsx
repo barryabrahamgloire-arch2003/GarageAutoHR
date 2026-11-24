@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import type { IconifyIcon } from "@iconify/react";
 import chat from "@iconify-icons/line-md/chat";
 import trash from "@iconify-icons/line-md/trash";
 import chevronDown from "@iconify-icons/line-md/chevron-down";
 import chevronUp from "@iconify-icons/line-md/chevron-up";
+import steering from "@iconify-icons/line-md/steering";
+import gauge from "@iconify-icons/line-md/gauge";
+import fileDocument from "@iconify-icons/line-md/file-document";
+import confirm from "@iconify-icons/line-md/confirm";
+import checkAll from "@iconify-icons/line-md/check-all";
+import watch from "@iconify-icons/line-md/watch";
 import { Gear, MotionIcon } from "@/components/motion-icon";
 import { STATUSES, type Status } from "@/lib/types";
 import { STATUS_LABEL, whatsappHref } from "@/lib/format";
@@ -252,13 +259,30 @@ export function WhatsApp({ talk }: { talk: Talk }) {
   );
 }
 
+export const STATUS_ICON: Record<Status, IconifyIcon> = {
+  recu: steering,
+  diagnostic: gauge,
+  facture_prete: fileDocument,
+  paiement_effectue: confirm,
+  reparation_faite: checkAll,
+};
+
+export function StatusMark({ status, label, size = 16 }: { status: Status | null; label: string; size?: number }) {
+  return (
+    <span className={status ? `status-pill status-${status}` : "status-pill status-wait"}>
+      <MotionIcon icon={status ? STATUS_ICON[status] : watch} size={size} />
+      <span>{label}</span>
+    </span>
+  );
+}
+
 export function StatusRail({ status }: { status: Status }) {
   const index = STATUSES.indexOf(status);
   return (
     <ol className="rail">
       {STATUSES.map((step, stepIndex) => (
         <li key={step} className={stepIndex < index ? "done" : stepIndex === index ? "now" : ""}>
-          <span>{stepIndex + 1}</span>
+          <span><MotionIcon icon={STATUS_ICON[step]} size={16} /></span>
           {STATUS_LABEL[step]}
         </li>
       ))}

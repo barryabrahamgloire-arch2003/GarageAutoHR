@@ -212,6 +212,7 @@ export interface Dossier {
   depositPaid: number;
   notes: Note[];
   events: JournalEvent[];
+  photo?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -239,6 +240,7 @@ export interface ReceptionInput {
   makeModel: string;
   arrivalFaults: string;
   actor: string;
+  photo?: string;
 }
 
 export type Action =

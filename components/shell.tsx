@@ -78,7 +78,7 @@ export function Shell({ children }: { children: ReactNode }) {
     return (
       <div className="grid min-h-dvh place-items-center px-6">
         <div className="glass max-w-md p-8 text-center">
-          <Image src="/logo.png" alt="Garage Auto HR" width={72} height={72} className="mx-auto" />
+          <Image src="/logo.png" alt="Garage Auto HR" width={72} height={72} className="logo-tile mx-auto" />
           <h1 className="mt-4 text-2xl font-bold">Espace inaccessible</h1>
           <p className="quiet mt-3">{error || "Reconnectez-vous pour ouvrir votre interface."}</p>
           <button className="btn mt-5" type="button" onClick={() => refresh().catch(() => undefined)}>
@@ -115,7 +115,7 @@ function Sidebar({ compact, onToggle }: { compact: boolean; onToggle: () => void
     <aside className="sidebar no-print">
       <div className="side-top">
         <Link href="/" className="side-brand" aria-label="Accueil">
-          <Image src="/logo.png" alt="" width={56} height={56} />
+          <Image src="/logo.png" alt="" width={56} height={56} className="logo-tile" />
           <span className="side-copy">
             <strong>Garage Auto HR</strong>
             <small>{state.settings.city}</small>

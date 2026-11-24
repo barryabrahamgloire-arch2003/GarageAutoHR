@@ -1,5 +1,6 @@
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, GARAGE_ID, type SpaceRole } from "./accounts";
 import { hashPassword } from "./passwords";
+import { keepPhoto } from "./photo";
 import { createSeed } from "./seed";
 import type { Action, Role, State } from "./types";
 
@@ -223,6 +224,7 @@ export function normalizeState(state: State): State {
     dossiers: state.dossiers.map((dossier) => ({
       ...dossier,
       clientStatus: dossier.clientStatus === undefined ? dossier.status : dossier.clientStatus,
+      photo: keepPhoto(dossier.photo),
       notes: (dossier.notes ?? []).map((note) => ({ ...note, kind: note.kind ?? "note" })),
     })),
   };

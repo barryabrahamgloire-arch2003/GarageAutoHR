@@ -13,6 +13,7 @@ import type {
   WorkshopSheet,
   WorkshopTask,
 } from "./types";
+import { keepPhoto } from "./photo";
 import { clock, today } from "./format";
 
 export class DomainError extends Error {
@@ -319,6 +320,7 @@ function openReception(state: State, input: ReceptionInput): State {
     invoice: null,
     depositPaid: 0,
     notes: [],
+    photo: keepPhoto(input.photo),
     events: [{ id: uid("ev"), at: stamp, actor, text: "Ordre de réception ouvert." }],
     createdAt: stamp,
     updatedAt: stamp,

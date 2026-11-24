@@ -38,7 +38,7 @@ export function OnlineRequests() {
     <div className="rise grid gap-8">
       <div className="grid gap-4">
         <header className="home-hero">
-          <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo" />
+          <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo logo-tile" />
           <div>
             <p className="kicker">Réception</p>
             <h1 className="mt-1">Demandes en ligne</h1>

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { applyAction, DomainError, moneyOf } from "../lib/domain";
+import { keepPhoto } from "../lib/photo";
 import { createSeed } from "../lib/seed";
 import type { State } from "../lib/types";
 
@@ -187,5 +188,47 @@ describe("circuit du garage de Conakry", () => {
         }),
       DomainError,
     );
+  });
+
+  it("garde une photo jpeg légère et écarte le reste", () => {
+    const photo = `data:image/jpeg;base64,${"A".repeat(80)}`;
+    const state = go(createSeed(), {
+      type: "openReception",
+      payload: {
+        openedAt: "2026-11-16",
+        plate: "RC 4410 P",
+        receptionist: "Aissatou Diallo",
+        particulier: "Mariam Diallo",
+        engine: "Essence",
+        phone: "+224 620 11 22 33",
+        company: "",
+        driver: "",
+        makeModel: "Kia Picanto",
+        arrivalFaults: "Voyant moteur.",
+        actor: "Aissatou Diallo",
+        photo,
+      },
+    });
+    const kept = state.dossiers.find((item) => item.reception.plate === "RC 4410 P");
+    assert.equal(kept?.photo, photo);
+    const dropped = go(createSeed(), {
+      type: "openReception",
+      payload: {
+        openedAt: "2026-11-16",
+        plate: "RC 4411 P",
+        receptionist: "Aissatou Diallo",
+        particulier: "Mariam Diallo",
+        engine: "Essence",
+        phone: "+224 620 11 22 33",
+        company: "",
+        driver: "",
+        makeModel: "Kia Picanto",
+        arrivalFaults: "Voyant moteur.",
+        actor: "Aissatou Diallo",
+        photo: "https://example.test/voiture.jpg",
+      },
+    });
+    assert.equal(dropped.dossiers.find((item) => item.reception.plate === "RC 4411 P")?.photo, "");
+    assert.equal(keepPhoto("data:image/png;base64,aaaa"), "");
   });
 });
