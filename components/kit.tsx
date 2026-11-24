@@ -41,16 +41,40 @@ export function TextField({
   onChange,
   type = "text",
   placeholder,
+  inputMode,
+  autoComplete,
+  autoCapitalize,
+  spellCheck,
+  min,
+  step,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
   placeholder?: string;
+  inputMode?: "text" | "tel" | "numeric" | "decimal" | "email" | "search";
+  autoComplete?: string;
+  autoCapitalize?: "off" | "none" | "characters" | "words" | "sentences";
+  spellCheck?: boolean;
+  min?: number;
+  step?: number;
 }) {
   return (
     <Field label={label}>
-      <input className="field" type={type} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+      <input
+        className="field"
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        autoCapitalize={autoCapitalize}
+        spellCheck={spellCheck}
+        min={min}
+        step={step}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </Field>
   );
 }

@@ -50,7 +50,7 @@ export function PriceGrid() {
         <p className="quiet mt-3 max-w-xl">Le prix de vente sert à la facture. Le prix d’achat, lui, est noté par les achats.</p>
       </header>
       <div className="flex flex-wrap items-center gap-3">
-        <input className="field max-w-md" value={query} placeholder="Chercher une pièce" onChange={(event) => setQuery(event.target.value)} />
+        <input className="field max-w-md" type="search" value={query} placeholder="Chercher une pièce" onChange={(event) => setQuery(event.target.value)} />
         <button className="btn" type="button" onClick={() => setCreateOpen(true)}><MotionIcon icon={plus} /><span>Nouveau produit</span></button>
       </div>
       <div className="grid gap-3">
@@ -64,11 +64,11 @@ export function PriceGrid() {
               </div>
               <label className="grid gap-1">
                 <span className="label">Prix de vente</span>
-                <input className="field" inputMode="numeric" value={draft.price} onChange={(event) => setDrafts((current) => ({ ...current, [product.id]: { ...draft, price: event.target.value } }))} />
+                <input className="field" type="number" inputMode="numeric" min={0} step={1} value={draft.price} onChange={(event) => setDrafts((current) => ({ ...current, [product.id]: { ...draft, price: event.target.value } }))} />
               </label>
               <label className="grid gap-1">
                 <span className="label">Stock</span>
-                <input className="field" inputMode="numeric" value={draft.stock} onChange={(event) => setDrafts((current) => ({ ...current, [product.id]: { ...draft, stock: event.target.value } }))} />
+                <input className="field" type="number" inputMode="numeric" min={0} step={1} value={draft.stock} onChange={(event) => setDrafts((current) => ({ ...current, [product.id]: { ...draft, stock: event.target.value } }))} />
               </label>
               <button
                 className="btn"
@@ -98,11 +98,11 @@ export function PriceGrid() {
             });
           }}
         >
-          <input className="field" placeholder="Nom" value={creating.name} onChange={(event) => setCreating({ ...creating, name: event.target.value })} />
-          <input className="field" placeholder="Référence" value={creating.reference} onChange={(event) => setCreating({ ...creating, reference: event.target.value })} />
-          <input className="field" placeholder="Catégorie" value={creating.category} onChange={(event) => setCreating({ ...creating, category: event.target.value })} />
-          <input className="field" placeholder="Prix" inputMode="numeric" value={creating.price || ""} onChange={(event) => setCreating({ ...creating, price: parseAmount(event.target.value) ?? 0 })} />
-          <input className="field" placeholder="Stock" inputMode="numeric" value={creating.stock || ""} onChange={(event) => setCreating({ ...creating, stock: parseAmount(event.target.value) ?? 0 })} />
+          <input className="field" type="text" placeholder="Nom" value={creating.name} onChange={(event) => setCreating({ ...creating, name: event.target.value })} />
+          <input className="field" type="text" placeholder="Référence" autoCapitalize="characters" spellCheck={false} value={creating.reference} onChange={(event) => setCreating({ ...creating, reference: event.target.value })} />
+          <input className="field" type="text" placeholder="Catégorie" value={creating.category} onChange={(event) => setCreating({ ...creating, category: event.target.value })} />
+          <input className="field" type="number" inputMode="numeric" min={0} step={1} placeholder="Prix" value={creating.price || ""} onChange={(event) => setCreating({ ...creating, price: parseAmount(event.target.value) ?? 0 })} />
+          <input className="field" type="number" inputMode="numeric" min={0} step={1} placeholder="Stock" value={creating.stock || ""} onChange={(event) => setCreating({ ...creating, stock: parseAmount(event.target.value) ?? 0 })} />
           <button className="btn" type="submit"><MotionIcon icon={plus} /><span>Ajouter à la grille</span></button>
         </form>
       </Popup>

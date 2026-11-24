@@ -38,13 +38,13 @@ export function ReceptionEditor({
     >
       <section className="grid gap-4 md:grid-cols-2">
         <TextField label="Date d’ouverture" type="date" value={draft.openedAt} onChange={(value) => set("openedAt", value)} />
-        <TextField label="Numéro d’immatriculation" value={draft.plate} onChange={(value) => set("plate", value)} />
-        <TextField label="Réceptionniste" value={draft.receptionist} onChange={(value) => set("receptionist", value)} />
-        <TextField label="Particulier" value={draft.particulier} onChange={(value) => set("particulier", value)} />
+        <TextField label="Numéro d’immatriculation" value={draft.plate} onChange={(value) => set("plate", value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} />
+        <TextField label="Réceptionniste" value={draft.receptionist} onChange={(value) => set("receptionist", value)} autoComplete="name" />
+        <TextField label="Particulier" value={draft.particulier} onChange={(value) => set("particulier", value)} autoComplete="name" />
         <TextField label="Moteur" value={draft.engine} onChange={(value) => set("engine", value)} />
-        <TextField label="Téléphone" value={draft.phone} onChange={(value) => set("phone", value)} />
-        <TextField label="Entreprise" value={draft.company} onChange={(value) => set("company", value)} />
-        <TextField label="Chauffeur" value={draft.driver} onChange={(value) => set("driver", value)} />
+        <TextField label="Téléphone" type="tel" inputMode="tel" autoComplete="tel" value={draft.phone} onChange={(value) => set("phone", value)} />
+        <TextField label="Entreprise" value={draft.company} onChange={(value) => set("company", value)} autoComplete="organization" />
+        <TextField label="Chauffeur" value={draft.driver} onChange={(value) => set("driver", value)} autoComplete="name" />
         <div className="md:col-span-2">
           <TextField label="Marque / modèle" value={draft.makeModel} onChange={(value) => set("makeModel", value)} />
         </div>
@@ -60,14 +60,14 @@ export function ReceptionEditor({
           </div>
           <TextField label="Date" type="date" value={draft.diagnosticDate} onChange={(value) => set("diagnosticDate", value)} />
           <Choice label="Section" value={draft.section} options={SECTIONS} onChange={(value) => set("section", value)} />
-          <TextField label="Prénom et nom de l’intervenant" value={draft.intervenant} onChange={(value) => set("intervenant", value)} />
+          <TextField label="Prénom et nom de l’intervenant" value={draft.intervenant} onChange={(value) => set("intervenant", value)} autoComplete="name" />
           <TextField label="Date de fin des travaux" type="date" value={draft.workEndDate} onChange={(value) => set("workEndDate", value)} />
           <div className="md:col-span-2">
             <AreaField label="Observation" value={draft.observation} onChange={(value) => set("observation", value)} />
           </div>
-          <TextField label="Nom du responsable" value={draft.managerName} onChange={(value) => set("managerName", value)} />
+          <TextField label="Nom du responsable" value={draft.managerName} onChange={(value) => set("managerName", value)} autoComplete="name" />
           <SignaturePad value={draft.managerSignature} onChange={(value) => set("managerSignature", value)} />
-          <TextField label="Nom du client" value={draft.clientSigner} onChange={(value) => set("clientSigner", value)} />
+          <TextField label="Nom du client" value={draft.clientSigner} onChange={(value) => set("clientSigner", value)} autoComplete="name" />
           <SignaturePad value={draft.clientSignature} onChange={(value) => set("clientSignature", value)} />
         </section>
       ) : null}
@@ -108,8 +108,8 @@ export function WorkshopEditor({
         <TextField label="Heure de fin" type="time" value={draft.endTime} onChange={(value) => set("endTime", value)} />
         <TextField label="Marque / modèle" value={draft.makeModel} onChange={(value) => set("makeModel", value)} />
         <Choice label="Section" value={draft.section} options={SECTIONS} onChange={(value) => set("section", value)} />
-        <TextField label="Numéro d’immatriculation" value={draft.plate} onChange={(value) => set("plate", value)} />
-        <TextField label="Compteur fin" value={draft.odometerEnd} onChange={(value) => set("odometerEnd", value)} />
+        <TextField label="Numéro d’immatriculation" value={draft.plate} onChange={(value) => set("plate", value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} />
+        <TextField label="Compteur fin" type="number" inputMode="numeric" min={0} step={1} value={draft.odometerEnd} onChange={(value) => set("odometerEnd", value)} />
       </div>
       <div className="grid gap-3">
         {draft.tasks.map((task, index) => (
@@ -167,9 +167,9 @@ export function WorkshopEditor({
         </button>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <TextField label="Nom de l’intervenant" value={draft.intervenant} onChange={(value) => set("intervenant", value)} />
+        <TextField label="Nom de l’intervenant" value={draft.intervenant} onChange={(value) => set("intervenant", value)} autoComplete="name" />
         <SignaturePad value={draft.intervenantSignature} onChange={(value) => set("intervenantSignature", value)} />
-        <TextField label="Nom du chef d’atelier" value={draft.chef} onChange={(value) => set("chef", value)} />
+        <TextField label="Nom du chef d’atelier" value={draft.chef} onChange={(value) => set("chef", value)} autoComplete="name" />
         <SignaturePad value={draft.chefSignature} onChange={(value) => set("chefSignature", value)} />
       </div>
       <div className="flex gap-2">
@@ -220,14 +220,14 @@ export function ReportEditor({
         onSubmit(draft).finally(() => setPending(false));
       }}
     >
-      <TextField label="Numéro d’immatriculation" value={draft.plate} onChange={(value) => set("plate", value)} />
+      <TextField label="Numéro d’immatriculation" value={draft.plate} onChange={(value) => set("plate", value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} />
       <TextField label="Marque / modèle" value={draft.makeModel} onChange={(value) => set("makeModel", value)} />
-      <TextField label="Kms" value={draft.kms} onChange={(value) => set("kms", value)} />
-      <TextField label="Client" value={draft.clientName} onChange={(value) => set("clientName", value)} />
+      <TextField label="Kms" type="number" inputMode="numeric" min={0} step={1} value={draft.kms} onChange={(value) => set("kms", value)} />
+      <TextField label="Client" value={draft.clientName} onChange={(value) => set("clientName", value)} autoComplete="name" />
       <TextField label="Date d’entrée" type="date" value={draft.entryDate} onChange={(value) => set("entryDate", value)} />
       <TextField label="Date de sortie" type="date" value={draft.exitDate} onChange={(value) => set("exitDate", value)} />
-      <TextField label="Téléphone client" value={draft.phone} onChange={(value) => set("phone", value)} />
-      <TextField label="Nom du chauffeur" value={draft.driver} onChange={(value) => set("driver", value)} />
+      <TextField label="Téléphone client" type="tel" inputMode="tel" autoComplete="tel" value={draft.phone} onChange={(value) => set("phone", value)} />
+      <TextField label="Nom du chauffeur" value={draft.driver} onChange={(value) => set("driver", value)} autoComplete="name" />
       <div className="md:col-span-2">
         <AreaField label="Description des pannes" value={draft.faults} onChange={(value) => set("faults", value)} />
       </div>
@@ -237,13 +237,13 @@ export function ReportEditor({
       <div className="md:col-span-2">
         <AreaField label="Observation" value={draft.observation} onChange={(value) => set("observation", value)} />
       </div>
-      <TextField label="Chef d’atelier" value={draft.chef} onChange={(value) => set("chef", value)} />
-      <TextField label="Directeur technique" value={draft.director} onChange={(value) => set("director", value)} />
+      <TextField label="Chef d’atelier" value={draft.chef} onChange={(value) => set("chef", value)} autoComplete="name" />
+      <TextField label="Directeur technique" value={draft.director} onChange={(value) => set("director", value)} autoComplete="name" />
       <TextField label="Date" type="date" value={draft.date} onChange={(value) => set("date", value)} />
       <TextField label="Heure" type="time" value={draft.time} onChange={(value) => set("time", value)} />
       <SignaturePad value={draft.chefSignature} onChange={(value) => set("chefSignature", value)} />
       <div className="grid gap-3">
-        <TextField label="Nom du client qui signe" value={draft.clientSigner} onChange={(value) => set("clientSigner", value)} />
+        <TextField label="Nom du client qui signe" value={draft.clientSigner} onChange={(value) => set("clientSigner", value)} autoComplete="name" />
         <SignaturePad value={draft.clientSignature} onChange={(value) => set("clientSignature", value)} />
       </div>
       <div className="md:col-span-2">

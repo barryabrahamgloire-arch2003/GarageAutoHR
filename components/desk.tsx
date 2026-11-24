@@ -276,11 +276,11 @@ function BuyNote({
         <div className="grid gap-3">
           <label className="grid gap-1.5">
             <span className="label">Prix obtenu</span>
-            <input className="field" inputMode="numeric" value={raw} onChange={(event) => onPrice(event.target.value)} />
+            <input className="field" type="number" inputMode="numeric" min={0} step={1} value={raw} onChange={(event) => onPrice(event.target.value)} />
           </label>
           <label className="grid gap-1.5">
             <span className="label">Où, ou note</span>
-            <input className="field" value={note} onChange={(event) => onNote(event.target.value)} />
+            <input className="field" type="text" value={note} onChange={(event) => onNote(event.target.value)} />
           </label>
           {over ? <p className="text-sm text-[#8d3a32]">Ce prix dépasse le maximum validé. La direction le verra.</p> : null}
           <button className="btn" type="button" disabled={!ready} onClick={() => { onBuy(); setOpen(false); }}><MotionIcon icon={checkAll} /><span>J’ai acheté</span></button>

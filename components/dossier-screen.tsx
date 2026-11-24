@@ -268,15 +268,15 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
           </label>
           <label className="grid gap-1.5">
             <span className="label">Désignation</span>
-            <input className="field" value={label} onChange={(event) => setLabel(event.target.value)} />
+            <input className="field" type="text" value={label} onChange={(event) => setLabel(event.target.value)} />
           </label>
           <label className="grid gap-1.5">
             <span className="label">Quantité</span>
-            <input className="field" inputMode="numeric" value={qty} onChange={(event) => setQty(event.target.value)} />
+            <input className="field" type="number" inputMode="numeric" min={1} step={1} value={qty} onChange={(event) => setQty(event.target.value)} />
           </label>
           <label className="grid gap-1.5">
             <span className="label">Constat</span>
-            <input className="field" value={constat} onChange={(event) => setConstat(event.target.value)} />
+            <input className="field" type="text" value={constat} onChange={(event) => setConstat(event.target.value)} />
           </label>
           <button className="btn" type="submit"><MotionIcon icon={plus} /><span>Ajouter au dossier</span></button>
         </form>
@@ -315,7 +315,7 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
       </div>
       {canMoney && !frozen ? (
         <div className="mt-3 flex flex-wrap gap-2">
-          <input className="field !w-36" inputMode="numeric" value={price} onChange={(event) => setPrice(event.target.value)} aria-label={`Prix de ${part.label}`} />
+          <input className="field !w-36" type="number" inputMode="numeric" min={0} step={1} value={price} onChange={(event) => setPrice(event.target.value)} aria-label={`Prix de ${part.label}`} />
           <button className="btn-line" type="button" onClick={() => {
             const amount = parseAmount(price);
             if (amount === null) return;
@@ -342,7 +342,7 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
       ) : null}
       <Popup open={ask} title="Demander l’achat" onClose={() => setAsk(false)}>
         <div className="grid gap-3">
-          <input className="field" inputMode="numeric" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} aria-label="Prix maximum" placeholder="Prix max" />
+          <input className="field" type="number" inputMode="numeric" min={0} step={1} value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} aria-label="Prix maximum" placeholder="Prix max" />
           <input className="field" type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} aria-label="Échéance" />
           <button className="btn" type="button" onClick={() => {
             const amount = parseAmount(maxPrice);
@@ -391,7 +391,7 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
       ) : null}
       <Popup open={laborOpen} title="Main-d’œuvre" onClose={() => setLaborOpen(false)}>
         <div className="grid gap-3">
-          <input className="field" inputMode="numeric" value={labor} onChange={(event) => setLabor(event.target.value)} aria-label="Main-d’œuvre" />
+          <input className="field" type="number" inputMode="numeric" min={0} step={1} value={labor} onChange={(event) => setLabor(event.target.value)} aria-label="Main-d’œuvre" />
           <button className="btn" type="button" onClick={() => {
             const amount = parseAmount(labor);
             if (amount === null) return;
@@ -439,7 +439,7 @@ function DepositBanner({
       <p className="mt-1">Acompte <Money value={due} /> · reçu <Money value={paid} /> · reste <Money value={balance} /></p>
       <Popup open={open} title="Encaisser" onClose={() => setOpen(false)}>
         <div className="grid gap-3">
-          <input className="field" inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />
+          <input className="field" type="number" inputMode="numeric" min={0} step={1} value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />
           <button className="btn" type="button" onClick={() => {
             const value = parseAmount(amount);
             if (value === null) return;

@@ -229,6 +229,9 @@
   outline-offset: 2px;
 }
 
+.field[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.field[type="number"]::-webkit-outer-spin-button,
+.field[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .field, .area, select.field {
   width: 100%;
   border-radius: 12px;

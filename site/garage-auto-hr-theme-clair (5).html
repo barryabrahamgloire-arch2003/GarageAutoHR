@@ -147,8 +147,8 @@ body::before{content:"";position:fixed;inset:0;z-index:9000;pointer-events:none;
 .topbar__phones a:hover{color:var(--red-600)}
 .topbar__phones svg{width:14px;height:14px;color:var(--red-600);flex:none}
 .topbar__phones .sep{color:var(--cream-40)}
-.header__inner{display:flex;align-items:center;justify-content:space-between;gap:24px;height:80px;transition:height .4s}
-.header.is-scrolled .header__inner{height:66px}
+.header__inner{--bar:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;height:var(--bar);transition:height .4s}
+.header.is-scrolled .header__inner{--bar:66px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo__badge{width:64px;height:64px;display:grid;place-items:center;flex:none;background:#fff;border-radius:16px;padding:6px}
 .logo:hover .logo__badge img{transform:rotate(90deg)}
@@ -585,8 +585,8 @@ body::before{opacity:.018}
 .hero,.hero *, .hero .hero__sub,.hero .hero__badge,.hero .fact,.hero .hero__scroll{color:#FFFFFF}
 .hero .hero__title .accent,.hero .hero__title .outline{color:#FFFFFF}
 @supports(-webkit-text-stroke:2px red){.hero .hero__title .outline{color:#FFFFFF;-webkit-text-stroke:2.5px #FFFFFF}}
-/* Logo du header : plus grand, sans ombre portée */
-.header .logo__badge{width:76px;height:76px}
+/* Le badge reste dans la hauteur de la barre, y compris une fois réduite */
+.header .logo__badge{width:calc(var(--bar) - 18px);height:calc(var(--bar) - 18px);transition:width .4s var(--ease),height .4s var(--ease)}
 /* Icônes dans les blocs rouge brique, quelle que soit leur taille */
 .card__icon,.info-item__icon{color:#FFFFFF}
 .card__icon svg,.info-item__icon svg{color:#FFFFFF;stroke:#FFFFFF}
