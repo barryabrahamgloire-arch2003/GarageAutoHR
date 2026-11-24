@@ -23,7 +23,7 @@ export function NewReception() {
   }
 
   return (
-    <section className="glass rise mx-auto grid max-w-3xl gap-6 p-6 md:p-8">
+    <section className="glass mx-auto grid max-w-3xl gap-6 p-6 md:p-8">
       <header>
         <p className="kicker">Ordre de réception</p>
         <h1 className="display mt-2 text-[2.4rem]">Nouvelle arrivée</h1>

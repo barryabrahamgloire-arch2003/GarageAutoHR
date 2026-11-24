@@ -42,7 +42,7 @@ export function PriceGrid() {
   }
 
   return (
-    <div className="rise grid gap-6">
+    <div className="grid gap-6">
       <header>
         <p className="kicker">Comptabilité</p>
         <h1 className="display mt-2">Grille et stock</h1>

@@ -35,7 +35,7 @@ export function OnlineRequests() {
   const fresh = list.filter((item) => !item.seenAt).length;
 
   return (
-    <div className="rise grid gap-8">
+    <div className="grid gap-8">
       <div className="grid gap-4">
         <header className="home-hero">
           <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo logo-tile" />

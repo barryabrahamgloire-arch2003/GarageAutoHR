@@ -127,12 +127,14 @@ export function GarageProvider({ children }: { children: ReactNode }) {
 
   const run = useCallback(
     async (action: Action, success?: string) => {
+      const id = toast.loading("Action en cours");
       try {
         await dispatch(action);
-        if (success) toast.success(success);
+        if (success) toast.success(success, { id });
+        else toast.dismiss(id);
         return true;
       } catch (reason) {
-        toast.error(reason instanceof Error ? reason.message : "Action impossible.");
+        toast.error(reason instanceof Error ? reason.message : "Action impossible.", { id });
         return false;
       }
     },

@@ -49,7 +49,7 @@ export function DossierScreen({ id }: { id: string }) {
   const canReport = role === "atelier";
 
   return (
-    <div className="rise grid gap-5">
+    <div className="grid gap-5">
       <header className="glass dossier-head p-6 md:p-8">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element

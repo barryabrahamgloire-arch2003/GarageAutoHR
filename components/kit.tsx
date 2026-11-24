@@ -302,7 +302,7 @@ export function PaperRow({ label, value }: { label: string; value?: string }) {
 
 export function Empty({ title, text, action }: { title: string; text: string; action?: ReactNode }) {
   return (
-    <section className="glass rise mx-auto max-w-xl p-8 text-center">
+    <section className="glass mx-auto max-w-xl p-8 text-center">
       <h1 className="display text-[2.2rem]">{title}</h1>
       <p className="quiet mt-3">{text}</p>
       {action ? <div className="mt-5">{action}</div> : null}

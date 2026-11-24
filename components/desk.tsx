@@ -30,7 +30,7 @@ export function Desk() {
 
   const groups = groupsFor(role, state.dossiers);
   return (
-    <div className="rise grid gap-8">
+    <div className="grid gap-8">
       <Header
         kicker={roleLabel(role)}
         title={role === "reception" ? "Les voitures du jour" : role === "atelier" ? "L’atelier" : "À chiffrer et à encaisser"}
@@ -168,7 +168,7 @@ function ClientDesk() {
   const dossiers = clientDossiers(state, clientId);
   const client = state.clients.find((item) => item.id === clientId);
   return (
-    <div className="rise grid gap-6">
+    <div className="grid gap-6">
       <Header
         kicker="Client"
         title={client?.company || client?.name || "Mes voitures"}
@@ -194,7 +194,7 @@ function DirectionDesk() {
   if (!state) return null;
   const pending = state.purchases.filter((item) => item.status === "a_valider");
   return (
-    <div className="rise grid gap-8">
+    <div className="grid gap-8">
       <Header
         kicker="Direction"
         title="Tous les dossiers"
@@ -298,7 +298,7 @@ function Purchases() {
   const direction = state.staff.find((person) => person.role === "direction");
 
   return (
-    <div className="rise grid gap-8">
+    <div className="grid gap-8">
       <Header
         kicker="Achats"
         title="Liste à acheter"
