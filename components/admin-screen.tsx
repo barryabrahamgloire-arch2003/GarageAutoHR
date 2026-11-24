@@ -157,20 +157,20 @@ export function AdminScreen() {
         {notice ? <p className="text-sm">{notice}</p> : null}
 
         <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-          <section className="glass grid gap-4 p-6">
+          <section className="glass grid gap-3 p-4">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg">Garages</h2>
               <button className="btn" type="button" onClick={() => setGarageOpen(true)}><MotionIcon icon={plus} /><span>Nouveau garage</span></button>
             </div>
             <Popup open={garageOpen} title="Nouveau garage" onClose={() => setGarageOpen(false)}>
-              <div className="grid gap-3">
-            <Field label="Nom" value={garageForm.name} onChange={(name) => setGarageForm({ ...garageForm, name })} />
-            <Field label="Ville" value={garageForm.city} onChange={(city) => setGarageForm({ ...garageForm, city })} />
-            <Field label="Téléphone" value={garageForm.phone} onChange={(phone) => setGarageForm({ ...garageForm, phone })} />
-            <Field label="Directeur" value={garageForm.directorName} onChange={(directorName) => setGarageForm({ ...garageForm, directorName })} />
-            <Field label="E-mail du directeur" value={garageForm.directorEmail} onChange={(directorEmail) => setGarageForm({ ...garageForm, directorEmail })} />
-            <Field label="Mot de passe" value={garageForm.directorPassword} onChange={(directorPassword) => setGarageForm({ ...garageForm, directorPassword })} type="password" />
-            <button className="btn" type="button" disabled={pending === "garage"} onClick={() => send({ type: "createGarage", ...garageForm }, "garage").then(() => { setGarageForm(EMPTY_GARAGE); setGarageOpen(false); })}>
+              <div className="fields">
+            <Field label="Nom" value={garageForm.name} onChange={(name) => setGarageForm({ ...garageForm, name })} autoComplete="organization" />
+            <Field label="Ville" value={garageForm.city} onChange={(city) => setGarageForm({ ...garageForm, city })} autoComplete="address-level2" />
+            <Field label="Téléphone" type="tel" inputMode="tel" autoComplete="tel" value={garageForm.phone} onChange={(phone) => setGarageForm({ ...garageForm, phone })} />
+            <Field label="Directeur" autoComplete="name" autoCapitalize="words" value={garageForm.directorName} onChange={(directorName) => setGarageForm({ ...garageForm, directorName })} />
+            <Field label="E-mail du directeur" type="email" inputMode="email" autoComplete="email" value={garageForm.directorEmail} onChange={(directorEmail) => setGarageForm({ ...garageForm, directorEmail })} />
+            <Field label="Mot de passe" value={garageForm.directorPassword} onChange={(directorPassword) => setGarageForm({ ...garageForm, directorPassword })} type="password" autoComplete="new-password" />
+            <button className="btn span-2" type="button" disabled={pending === "garage"} onClick={() => send({ type: "createGarage", ...garageForm }, "garage").then(() => { setGarageForm(EMPTY_GARAGE); setGarageOpen(false); })}>
               <MotionIcon icon={checkAll} /><span>Créer le garage</span>
             </button>
               </div>
@@ -185,7 +185,7 @@ export function AdminScreen() {
             </div>
           </section>
 
-          <section className="glass grid gap-4 p-6">
+          <section className="glass grid gap-3 p-4">
             <div className="flex items-end justify-between gap-3">
               <h2 className="text-lg">Membres</h2>
               <button className="btn-ghost" type="button" disabled={pending === "reset"} onClick={() => send({ type: "resetDemo" }, "reset")}>
@@ -214,9 +214,9 @@ export function AdminScreen() {
             </div>
             <button className="btn w-fit" type="button" onClick={() => setMemberOpen(true)}><MotionIcon icon={accountAdd} /><span>Inviter</span></button>
             <Popup open={memberOpen} title="Inviter un membre" onClose={() => setMemberOpen(false)}>
-              <div className="grid gap-3">
-            <Field label="Nom" value={memberForm.name} onChange={(name) => setMemberForm({ ...memberForm, name })} autoComplete="name" />
-            <Field label="E-mail" type="email" autoComplete="email" value={memberForm.email} onChange={(email) => setMemberForm({ ...memberForm, email })} />
+              <div className="fields">
+            <Field label="Nom" value={memberForm.name} onChange={(name) => setMemberForm({ ...memberForm, name })} autoComplete="name" autoCapitalize="words" />
+            <Field label="E-mail" type="email" inputMode="email" autoComplete="email" value={memberForm.email} onChange={(email) => setMemberForm({ ...memberForm, email })} />
             <label className="grid gap-1">
               <span className="label">Rôle</span>
               <select className="field" value={memberForm.role} onChange={(event) => setMemberForm({ ...memberForm, role: event.target.value as SpaceRole })}>
@@ -243,7 +243,7 @@ export function AdminScreen() {
               </label>
             ) : null}
             <Field label="Mot de passe" value={memberForm.password} onChange={(password) => setMemberForm({ ...memberForm, password })} type="password" autoComplete="new-password" />
-            <button className="btn" type="button" disabled={pending === "member"} onClick={() => send({ type: "createAccount", ...memberForm }, "member").then(() => { setMemberForm(EMPTY_MEMBER); setMemberOpen(false); })}>
+            <button className="btn span-2" type="button" disabled={pending === "member"} onClick={() => send({ type: "createAccount", ...memberForm }, "member").then(() => { setMemberForm(EMPTY_MEMBER); setMemberOpen(false); })}>
               <MotionIcon icon={checkAll} /><span>Créer le compte</span>
             </button>
               </div>
@@ -255,11 +255,27 @@ export function AdminScreen() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", autoComplete }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  autoComplete,
+  inputMode,
+  autoCapitalize,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  autoComplete?: string;
+  inputMode?: "text" | "tel" | "email" | "numeric";
+  autoCapitalize?: "off" | "words" | "characters";
+}) {
   return (
     <label className="grid gap-1">
       <span className="label">{label}</span>
-      <input className="field" type={type} autoComplete={autoComplete} value={value} onChange={(event) => onChange(event.target.value)} />
+      <input className="field" type={type} inputMode={inputMode} autoComplete={autoComplete} autoCapitalize={autoCapitalize} spellCheck={type === "email" || type === "tel" ? false : undefined} value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
 }

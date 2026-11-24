@@ -31,7 +31,7 @@ export function Desk() {
 
   const groups = groupsFor(role, state.dossiers);
   return (
-    <div className="grid gap-8">
+    <div className="work">
       <Header
         kicker={roleLabel(role)}
         title={role === "reception" ? "Les voitures du jour" : role === "atelier" ? "L’atelier" : "À chiffrer et à encaisser"}
@@ -171,7 +171,7 @@ function ClientDesk() {
   const dossiers = clientDossiers(state, clientId);
   const client = state.clients.find((item) => item.id === clientId);
   return (
-    <div className="grid gap-6">
+    <div className="work">
       <Header
         kicker="Client"
         title={client?.company || client?.name || "Mes voitures"}
@@ -197,7 +197,7 @@ function DirectionDesk() {
   if (!state) return null;
   const pending = state.purchases.filter((item) => item.status === "a_valider");
   return (
-    <div className="grid gap-8">
+    <div className="work">
       <Header
         kicker="Direction"
         title="Tous les dossiers"
@@ -272,15 +272,15 @@ function BuyNote({
   return (
     <>
       <button className="btn w-fit" type="button" onClick={() => setOpen(true)}><MotionIcon icon={pencil} /><span>Noter l’achat</span></button>
-      <Popup open={open} title="Noter l’achat" onClose={() => setOpen(false)}>
+      <Popup open={open} title="Noter l’achat" short onClose={() => setOpen(false)}>
         <div className="grid gap-3">
           <label className="grid gap-1.5">
-            <span className="label">Prix obtenu</span>
-            <input className="field" type="number" inputMode="numeric" min={0} step={1} value={raw} onChange={(event) => onPrice(event.target.value)} />
+            <span className="label">Prix obtenu (GNF)</span>
+            <input className="field field-money" type="number" inputMode="numeric" autoComplete="off" min={0} step={1} value={raw} onChange={(event) => onPrice(event.target.value)} />
           </label>
           <label className="grid gap-1.5">
-            <span className="label">Où, ou note</span>
-            <input className="field" type="text" value={note} onChange={(event) => onNote(event.target.value)} />
+            <span className="label">Lieu ou note</span>
+            <input className="field" type="text" autoComplete="off" value={note} onChange={(event) => onNote(event.target.value)} />
           </label>
           {over ? <p className="text-sm text-[#8d3a32]">Ce prix dépasse le maximum validé. La direction le verra.</p> : null}
           <button className="btn" type="button" disabled={!ready} onClick={() => { onBuy(); setOpen(false); }}><MotionIcon icon={checkAll} /><span>J’ai acheté</span></button>
@@ -301,7 +301,7 @@ function Purchases() {
   const direction = state.staff.find((person) => person.role === "direction");
 
   return (
-    <div className="grid gap-8">
+    <div className="work">
       <Header
         kicker="Achats"
         title="Liste à acheter"
@@ -328,7 +328,7 @@ function Purchases() {
           const amount = parseAmount(raw);
           const over = amount !== null && amount > purchase.maxPrice;
           return (
-            <article key={purchase.id} className="glass grid gap-3 p-5">
+            <article key={purchase.id} className="glass grid gap-3 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="text-xl">{purchase.label}</h2>

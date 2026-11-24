@@ -36,7 +36,7 @@ export function OnlineRequests() {
   const fresh = list.filter((item) => !item.seenAt).length;
 
   return (
-    <div className="grid gap-8">
+    <div className="work">
       <div className="grid gap-4">
         <header className="home-hero">
           <Image src="/logo.png" alt="Garage Auto HR" width={64} height={64} className="home-logo logo-tile" />
@@ -59,7 +59,7 @@ export function OnlineRequests() {
       {rows && !list.length ? <p className="quiet">Aucune demande pour le moment.</p> : null}
       <div className="grid gap-3">
         {list.map((item) => (
-          <article key={item.id} className="glass grid gap-2 p-5">
+          <article key={item.id} className="glass grid gap-2 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="kicker">{item.kind === "client" ? "Client" : "Fournisseur"} · {new Date(item.createdAt).toLocaleString("fr-FR")}</p>
               {item.seenAt ? <span className="badge">Lue</span> : <span className="badge wait">Nouvelle</span>}

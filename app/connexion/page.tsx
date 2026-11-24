@@ -52,7 +52,7 @@ export default function LoginPage() {
           <p className="quiet mt-1">Choisissez un compte, ou saisissez l’e-mail.</p>
           <label className="mt-5 grid gap-1">
             <span className="label">E-mail</span>
-            <input className="field" type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            <input className="field" type="email" inputMode="email" autoComplete="username" autoCapitalize="none" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} required />
           </label>
           <label className="mt-3 grid gap-1">
             <span className="label">Mot de passe</span>

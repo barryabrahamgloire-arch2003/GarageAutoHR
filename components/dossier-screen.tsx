@@ -50,8 +50,8 @@ export function DossierScreen({ id }: { id: string }) {
   const canReport = role === "atelier";
 
   return (
-    <div className="grid gap-5">
-      <header className="glass dossier-head p-6 md:p-8">
+    <div className="work">
+      <header className="glass dossier-head sheet-head">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img className="dossier-photo" src={photo} alt={`Photo ${dossier.reception.plate}`} />
@@ -230,7 +230,7 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
     <Section title="Éléments à traiter" extra={canAdd && !frozen ? <button className="btn-line" type="button" onClick={() => setOpen(true)}><MotionIcon icon={plus} /><span>Ajouter</span></button> : undefined}>
       <Popup open={open} title="Ajouter une pièce" onClose={() => setOpen(false)}>
         <form
-          className="grid gap-3"
+          className="fields"
           onSubmit={(event) => {
             event.preventDefault();
             const product = state.products.find((item) => item.id === productId);
@@ -253,7 +253,7 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
             });
           }}
         >
-          <label className="grid gap-1.5">
+          <label className="span-2 grid gap-1.5">
             <span className="label">Produit de la grille</span>
             <select className="field" value={productId} onChange={(event) => {
               setProductId(event.target.value);
@@ -268,17 +268,17 @@ function PartsBlock({ dossier, canAdd, canMoney }: { dossier: Dossier; canAdd: b
           </label>
           <label className="grid gap-1.5">
             <span className="label">Désignation</span>
-            <input className="field" type="text" value={label} onChange={(event) => setLabel(event.target.value)} />
+            <input className="field" type="text" autoComplete="off" value={label} onChange={(event) => setLabel(event.target.value)} />
           </label>
           <label className="grid gap-1.5">
             <span className="label">Quantité</span>
-            <input className="field" type="number" inputMode="numeric" min={1} step={1} value={qty} onChange={(event) => setQty(event.target.value)} />
+            <input className="field" type="number" inputMode="numeric" autoComplete="off" min={1} step={1} value={qty} onChange={(event) => setQty(event.target.value)} />
           </label>
-          <label className="grid gap-1.5">
+          <label className="span-2 grid gap-1.5">
             <span className="label">Constat</span>
-            <input className="field" type="text" value={constat} onChange={(event) => setConstat(event.target.value)} />
+            <textarea className="area area-short" autoComplete="off" value={constat} onChange={(event) => setConstat(event.target.value)} />
           </label>
-          <button className="btn" type="submit"><MotionIcon icon={plus} /><span>Ajouter au dossier</span></button>
+          <button className="btn span-2" type="submit"><MotionIcon icon={plus} /><span>Ajouter au dossier</span></button>
         </form>
       </Popup>
       <div className="grid gap-3">
@@ -314,8 +314,11 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
         {canMoney ? <p>{part.unitPrice > 0 ? <Money value={part.unitPrice} /> : "Prix à fixer"}</p> : null}
       </div>
       {canMoney && !frozen ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          <input className="field !w-36" type="number" inputMode="numeric" min={0} step={1} value={price} onChange={(event) => setPrice(event.target.value)} aria-label={`Prix de ${part.label}`} />
+        <div className="action-row mt-3">
+          <label className="grid gap-1">
+            <span className="label">Prix (GNF)</span>
+            <input className="field field-money" type="number" inputMode="numeric" autoComplete="off" min={0} step={1} value={price} onChange={(event) => setPrice(event.target.value)} aria-label={`Prix de ${part.label}`} />
+          </label>
           <button className="btn-line" type="button" onClick={() => {
             const amount = parseAmount(price);
             if (amount === null) return;
@@ -340,11 +343,17 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
           <button className="btn-line" type="button" onClick={() => run({ type: "refusePurchase", payload: { purchaseId: purchase.id, actor: actorName } }, "Achat refusé")}><MotionIcon icon={closeIcon} /><span>Refuser</span></button>
         </div>
       ) : null}
-      <Popup open={ask} title="Demander l’achat" onClose={() => setAsk(false)}>
-        <div className="grid gap-3">
-          <input className="field" type="number" inputMode="numeric" min={0} step={1} value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} aria-label="Prix maximum" placeholder="Prix max" />
-          <input className="field" type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} aria-label="Échéance" />
-          <button className="btn" type="button" onClick={() => {
+      <Popup open={ask} title="Demander l’achat" short onClose={() => setAsk(false)}>
+        <div className="fields">
+          <label className="grid gap-1">
+            <span className="label">Prix maximum (GNF)</span>
+            <input className="field" type="number" inputMode="numeric" autoComplete="off" min={0} step={1} value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} />
+          </label>
+          <label className="grid gap-1">
+            <span className="label">Échéance</span>
+            <input className="field" type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} />
+          </label>
+          <button className="btn span-2" type="button" onClick={() => {
             const amount = parseAmount(maxPrice);
             if (amount === null) return;
             run({
@@ -389,9 +398,12 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
           </button>
         </div>
       ) : null}
-      <Popup open={laborOpen} title="Main-d’œuvre" onClose={() => setLaborOpen(false)}>
-        <div className="grid gap-3">
-          <input className="field" type="number" inputMode="numeric" min={0} step={1} value={labor} onChange={(event) => setLabor(event.target.value)} aria-label="Main-d’œuvre" />
+      <Popup open={laborOpen} title="Main-d’œuvre" short onClose={() => setLaborOpen(false)}>
+        <div className="action-row">
+          <label className="grid gap-1">
+            <span className="label">Montant (GNF)</span>
+            <input className="field field-money" type="number" inputMode="numeric" autoComplete="off" min={0} step={1} value={labor} onChange={(event) => setLabor(event.target.value)} />
+          </label>
           <button className="btn" type="button" onClick={() => {
             const amount = parseAmount(labor);
             if (amount === null) return;
@@ -437,9 +449,12 @@ function DepositBanner({
     >
       <p className="text-sm">{locked ? "La réparation ne commence qu’après 70 % de la facture." : covered && dossier.status !== "reparation_faite" ? "Acompte reçu. L’atelier peut réparer." : "Paiement à jour."}</p>
       <p className="mt-1">Acompte <Money value={due} /> · reçu <Money value={paid} /> · reste <Money value={balance} /></p>
-      <Popup open={open} title="Encaisser" onClose={() => setOpen(false)}>
-        <div className="grid gap-3">
-          <input className="field" type="number" inputMode="numeric" min={0} step={1} value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />
+      <Popup open={open} title="Encaisser" short onClose={() => setOpen(false)}>
+        <div className="action-row">
+          <label className="grid gap-1">
+            <span className="label">Montant reçu (GNF)</span>
+            <input className="field field-money" type="number" inputMode="numeric" autoComplete="off" min={0} step={1} value={amount} onChange={(event) => setAmount(event.target.value)} />
+          </label>
           <button className="btn" type="button" onClick={() => {
             const value = parseAmount(amount);
             if (value === null) return;
@@ -530,8 +545,11 @@ function Meeting({ dossier }: { dossier: Dossier }) {
   if (role !== "direction" && !dossier.notes.length) return null;
   return (
     <Section className="no-print" title="Voir le client" extra={role === "direction" ? <button className="btn" type="button" onClick={() => setOpen(true)}><MotionIcon icon={account} /><span>Demander</span></button> : undefined}>
-      <Popup open={open} title="Voir le client" onClose={() => setOpen(false)}>
-        <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} />
+      <Popup open={open} title="Voir le client" short onClose={() => setOpen(false)}>
+        <label className="grid gap-1.5">
+          <span className="label">Message</span>
+          <textarea className="area" autoComplete="off" value={text} onChange={(event) => setText(event.target.value)} />
+        </label>
         <button className="btn mt-3" type="button" onClick={() => run({ type: "requestClientMeeting", payload: { dossierId: dossier.id, text, actor: actorName } }, "Demande notée").then((ok) => { if (ok) setOpen(false); })}>
           <MotionIcon icon={checkAll} /><span>Noter la demande</span>
         </button>
@@ -588,7 +606,7 @@ function DirectionComments({ dossier }: { dossier: Dossier }) {
   const comments = dossier.notes.filter((note) => note.kind === "commentaire");
   return (
     <Section title="Commentaires de la direction" extra={role === "direction" ? <button className="btn-line" type="button" onClick={() => setOpen(true)}><MotionIcon icon={pencil} /><span>Écrire</span></button> : undefined}>
-      <Popup open={open} title="Commentaire" onClose={() => setOpen(false)}>
+      <Popup open={open} title="Commentaire" short onClose={() => setOpen(false)}>
         <form
           className="grid gap-3"
           onSubmit={(event) => {
@@ -601,7 +619,10 @@ function DirectionComments({ dossier }: { dossier: Dossier }) {
             });
           }}
         >
-          <textarea className="area" value={text} onChange={(event) => setText(event.target.value)} placeholder="Commentaire sur ce dossier" />
+          <label className="grid gap-1.5">
+            <span className="label">Commentaire</span>
+            <textarea className="area" autoComplete="off" value={text} onChange={(event) => setText(event.target.value)} />
+          </label>
           <button className="btn" type="submit" disabled={!text.trim()}><MotionIcon icon={checkAll} /><span>Publier le commentaire</span></button>
         </form>
       </Popup>

@@ -47,6 +47,7 @@ export function TextField({
   spellCheck,
   min,
   step,
+  enterKeyHint,
 }: {
   label: string;
   value: string;
@@ -59,6 +60,7 @@ export function TextField({
   spellCheck?: boolean;
   min?: number;
   step?: number;
+  enterKeyHint?: "search" | "done" | "next" | "go" | "send";
 }) {
   return (
     <Field label={label}>
@@ -68,21 +70,22 @@ export function TextField({
         value={value}
         placeholder={placeholder}
         inputMode={inputMode}
-        autoComplete={autoComplete}
+        autoComplete={autoComplete ?? (type === "number" ? "off" : undefined)}
         autoCapitalize={autoCapitalize}
-        spellCheck={spellCheck}
+        spellCheck={spellCheck ?? (type === "tel" || type === "email" ? false : undefined)}
         min={min}
         step={step}
+        enterKeyHint={enterKeyHint}
         onChange={(event) => onChange(event.target.value)}
       />
     </Field>
   );
 }
 
-export function AreaField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+export function AreaField({ label, value, onChange, short = false }: { label: string; value: string; onChange: (value: string) => void; short?: boolean }) {
   return (
     <Field label={label}>
-      <textarea className="area" value={value} onChange={(event) => onChange(event.target.value)} />
+      <textarea className={short ? "area area-short" : "area"} autoComplete="off" value={value} onChange={(event) => onChange(event.target.value)} />
     </Field>
   );
 }
@@ -326,10 +329,10 @@ export function PaperRow({ label, value }: { label: string; value?: string }) {
 
 export function Empty({ title, text, action }: { title: string; text: string; action?: ReactNode }) {
   return (
-    <section className="glass mx-auto max-w-xl p-8 text-center">
-      <h1 className="display text-[2.2rem]">{title}</h1>
-      <p className="quiet mt-3">{text}</p>
-      {action ? <div className="mt-5">{action}</div> : null}
+    <section className="glass mx-auto max-w-md px-5 py-6 text-center">
+      <h1 className="page-title">{title}</h1>
+      <p className="quiet mt-2">{text}</p>
+      {action ? <div className="mt-4">{action}</div> : null}
     </section>
   );
 }
