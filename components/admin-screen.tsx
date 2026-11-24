@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Count, NumberFlowGroup } from "@/components/figures";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import logoutIcon from "@iconify-icons/line-md/logout";
@@ -144,11 +145,13 @@ export function AdminScreen() {
           <p className="quiet mt-1">Les garages, leurs membres, et l’interface de chacun.</p>
         </header>
 
-        <p className="kpi-row">
-          <span><strong>{directory.garages.length}</strong>Garages</span>
-          <span><strong>{directory.accounts.length}</strong>Membres</span>
-          <span><strong>{directory.garages.reduce((sum, garage) => sum + garage.dossiers, 0)}</strong>Dossiers</span>
-        </p>
+        <NumberFlowGroup>
+          <p className="kpi-row">
+            <span><strong><Count value={directory.garages.length} /></strong>Garages</span>
+            <span><strong><Count value={directory.accounts.length} /></strong>Membres</span>
+            <span><strong><Count value={directory.garages.reduce((sum, garage) => sum + garage.dossiers, 0)} /></strong>Dossiers</span>
+          </p>
+        </NumberFlowGroup>
 
         {error ? <p className="text-sm text-[#8d3a32]">{error}</p> : null}
         {notice ? <p className="text-sm">{notice}</p> : null}

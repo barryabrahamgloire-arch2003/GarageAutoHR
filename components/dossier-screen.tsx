@@ -6,6 +6,7 @@ import { useGarage } from "@/components/garage-provider";
 import { ReceptionEditor, ReportEditor, WorkshopEditor } from "@/components/forms";
 import { Empty, PaperRow, Section, SignatureView, StatusMark, StatusRail, WhatsAppList } from "@/components/kit";
 import { MotionIcon } from "@/components/motion-icon";
+import { Money } from "@/components/figures";
 import { Popup } from "@/components/popup";
 import pencil from "@iconify-icons/line-md/pencil";
 import plus from "@iconify-icons/line-md/plus";
@@ -17,7 +18,7 @@ import account from "@iconify-icons/line-md/account";
 import download from "@iconify-icons/line-md/download";
 import arrowLeft from "@iconify-icons/line-md/arrow-left";
 import { emptyWorkshop, liveInvoice, moneyOf, reportDraft } from "@/lib/domain";
-import { formatDay, formatWhen, gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
+import { formatDay, formatWhen, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { keepPhoto } from "@/lib/photo";
 import { byPost, clientOf } from "@/lib/selectors";
 import { talkTo } from "@/lib/talk";
@@ -310,7 +311,7 @@ function PartRow({ part, dossier, canMoney, frozen }: { part: PartNeed; dossier:
             {purchase ? ` · achat ${purchase.status === "a_valider" ? "à valider" : purchase.status === "a_acheter" ? "à acheter" : purchase.status === "achete" ? "acheté" : "refusé"}` : ""}
           </p>
         </div>
-        {canMoney ? <p>{part.unitPrice > 0 ? gnf(part.unitPrice) : "Prix à fixer"}</p> : null}
+        {canMoney ? <p>{part.unitPrice > 0 ? <Money value={part.unitPrice} /> : "Prix à fixer"}</p> : null}
       </div>
       {canMoney && !frozen ? (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -370,15 +371,15 @@ function InvoiceBlock({ dossier, canMoney }: { dossier: Dossier; canMoney: boole
       {invoice.lines.map((line) => (
         <div className="row" key={line.id}>
           <span>{line.qty} × {line.label}</span>
-          <strong>{gnf(line.qty * line.unitPrice)}</strong>
+          <strong><Money value={line.qty * line.unitPrice} /></strong>
         </div>
       ))}
-      <div className="row"><span>Main-d’œuvre</span><strong>{gnf(invoice.labor)}</strong></div>
-      <div className="row"><span>TVA {Math.round(invoice.vatRate * 100)} %</span><strong>{gnf(bill.tva)}</strong></div>
-      <div className="row"><span>Total</span><strong>{gnf(bill.ttc)}</strong></div>
-      <div className="row"><span>Acompte 70 %</span><strong>{gnf(bill.depositDue)}</strong></div>
-      <div className="row"><span>Déjà reçu</span><strong>{gnf(bill.paid)}</strong></div>
-      <div className="row"><span>Reste à payer</span><strong>{gnf(bill.balance)}</strong></div>
+      <div className="row"><span>Main-d’œuvre</span><strong><Money value={invoice.labor} /></strong></div>
+      <div className="row"><span>TVA {Math.round(invoice.vatRate * 100)} %</span><strong><Money value={bill.tva} /></strong></div>
+      <div className="row"><span>Total</span><strong><Money value={bill.ttc} /></strong></div>
+      <div className="row"><span>Acompte 70 %</span><strong><Money value={bill.depositDue} /></strong></div>
+      <div className="row"><span>Déjà reçu</span><strong><Money value={bill.paid} /></strong></div>
+      <div className="row"><span>Reste à payer</span><strong><Money value={bill.balance} /></strong></div>
       {frozen ? <p className="hint mt-3">Facture figée le {formatWhen(dossier.invoice?.readyAt ?? "")}.</p> : null}
       {canMoney && !frozen ? (
         <div className="no-print mt-4 flex flex-wrap gap-2">
@@ -435,7 +436,7 @@ function DepositBanner({
       extra={canRecord && balance > 0 && dossier.invoice ? <button className="btn-line no-print" type="button" onClick={() => setOpen(true)}><MotionIcon icon={checkAll} /><span>Encaisser</span></button> : undefined}
     >
       <p className="text-sm">{locked ? "La réparation ne commence qu’après 70 % de la facture." : covered && dossier.status !== "reparation_faite" ? "Acompte reçu. L’atelier peut réparer." : "Paiement à jour."}</p>
-      <p className="mt-1">Acompte {gnf(due)} · reçu {gnf(paid)} · reste {gnf(balance)}</p>
+      <p className="mt-1">Acompte <Money value={due} /> · reçu <Money value={paid} /> · reste <Money value={balance} /></p>
       <Popup open={open} title="Encaisser" onClose={() => setOpen(false)}>
         <div className="grid gap-3">
           <input className="field" inputMode="numeric" value={amount} onChange={(event) => setAmount(event.target.value)} aria-label="Montant reçu" />

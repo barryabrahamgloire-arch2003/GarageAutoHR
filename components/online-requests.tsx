@@ -5,6 +5,7 @@ import Image from "next/image";
 import phone from "@iconify-icons/line-md/phone";
 import chat from "@iconify-icons/line-md/chat";
 import checkAll from "@iconify-icons/line-md/check-all";
+import { Count, NumberFlowGroup } from "@/components/figures";
 import { useGarage } from "@/components/garage-provider";
 import { MotionIcon } from "@/components/motion-icon";
 import { whatsappHref } from "@/lib/format";
@@ -43,11 +44,13 @@ export function OnlineRequests() {
             <p className="kicker">Réception</p>
             <h1 className="mt-1">Demandes en ligne</h1>
             <p className="quiet mt-2 max-w-xl">Les formulaires du site arrivent ici, et un mail part vers contact@garageautohrco.com.</p>
-            <p className="kpi-row">
-              <span><strong>{fresh}</strong>Nouvelles</span>
-              <span><strong>{list.length}</strong>Au total</span>
-              <span><strong>{list.filter((item) => item.kind === "client").length}</strong>Clients</span>
-            </p>
+            <NumberFlowGroup>
+              <p className="kpi-row">
+                <span><strong><Count value={fresh} /></strong>Nouvelles</span>
+                <span><strong><Count value={list.length} /></strong>Au total</span>
+                <span><strong><Count value={list.filter((item) => item.kind === "client").length} /></strong>Clients</span>
+              </p>
+            </NumberFlowGroup>
           </div>
         </header>
       </div>

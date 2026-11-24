@@ -15,6 +15,7 @@ import { useGarage } from "@/components/garage-provider";
 import { MotionIcon } from "@/components/motion-icon";
 import { Empty, StatusMark, WhatsAppList } from "@/components/kit";
 import { Popup } from "@/components/popup";
+import { Count, Money, NumberFlowGroup } from "@/components/figures";
 import { gnf, parseAmount, STATUS_HELP, STATUS_LABEL } from "@/lib/format";
 import { keepPhoto } from "@/lib/photo";
 import { clientDossiers, nextAction, sortDossiers, titleOf } from "@/lib/selectors";
@@ -110,11 +111,13 @@ function Header({ kicker, title, text, action, stats }: { kicker: string; title:
         <h1 className="mt-1">{title}</h1>
         <p className="quiet mt-2 max-w-xl">{text}</p>
         {stats?.length ? (
-          <p className="kpi-row">
-            {stats.map((stat) => (
-              <span key={stat.label}><strong>{stat.value}</strong>{stat.label}</span>
-            ))}
-          </p>
+          <NumberFlowGroup>
+            <p className="kpi-row">
+              {stats.map((stat) => (
+                <span key={stat.label}><strong><Count value={stat.value} /></strong>{stat.label}</span>
+              ))}
+            </p>
+          </NumberFlowGroup>
         ) : null}
       </div>
       {action ? <div className="home-action">{action}</div> : null}
@@ -333,7 +336,7 @@ function Purchases() {
                 </div>
                 <div className="text-right">
                   <p className="kicker">Prix max</p>
-                  <p className="plate text-[1.6rem]">{gnf(purchase.maxPrice)}</p>
+                  <p className="plate text-[1.6rem]"><Money value={purchase.maxPrice} /></p>
                   <p className="quiet text-sm">Avant le {purchase.deadline}</p>
                 </div>
               </div>

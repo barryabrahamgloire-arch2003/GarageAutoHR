@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import plus from "@iconify-icons/line-md/plus";
 import checkAll from "@iconify-icons/line-md/check-all";
+import { Money } from "@/components/figures";
 import { useGarage } from "@/components/garage-provider";
 import { MotionIcon } from "@/components/motion-icon";
 import { Empty } from "@/components/kit";
 import { Popup } from "@/components/popup";
-import { gnf, parseAmount } from "@/lib/format";
+import { parseAmount } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
 export function PriceGrid() {
@@ -59,7 +60,7 @@ export function PriceGrid() {
             <article key={product.id} className="glass grid items-end gap-3 p-4 md:grid-cols-[1.4fr_0.7fr_0.5fr_auto]">
               <div>
                 <strong>{product.name}</strong>
-                <p className="quiet text-sm">{product.category} · {product.reference} · {gnf(product.price)}</p>
+                <p className="quiet text-sm">{product.category} · {product.reference} · <Money value={product.price} /></p>
               </div>
               <label className="grid gap-1">
                 <span className="label">Prix de vente</span>
